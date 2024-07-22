@@ -1,0 +1,51 @@
+{% extends 'layouts/main1.html' %}
+
+{% load static %}
+
+{% block body %}
+<!-- Category Banner Section -->
+<section class="category_banner_section">
+    <div class="banner" style="background-image: url('{% if category.image %}{{ category.image.url }}{% else %}{% static 'images/default_banner.jpg' %}{% endif %}');">
+        <h1>{{ category.name }}</h1> 
+    </div>
+</section>
+<!-- End Category Banner Section -->
+
+<!-- Category Details Section -->
+<section class="category_detail_section layout_padding">
+    <div class="container">
+        <h2 class="text-center mb-4">Our Products</h2>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="product_box">
+                    <div class="img-box">
+                        {% if product.first_image %}
+                        <img src="{{ product.first_image.image.url }}" alt="{{ product.name }}">
+                        print(f'Product: {product.name}, First Image: {product.first_image.image.url}')
+                        {% else %}
+                        <img src="{% static 'images/no_image_available.png' %}" alt="No Image">
+                        print(f'Product: {product.name}, First Image: None')
+                        {% endif %}
+                    </div>
+                    <div class="detail-box">
+                        <h5>{{ product.name }}</h5>
+                        <h6>
+                            {% if product.first_variant %}
+                                ${{ product.first_variant.price }}
+                            {% else %}
+                                Price not available
+                            {% endif %}
+                        </h6>
+                        <a href="{% url 'product_detail' product.slug %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- End Category Details Section -->
+{% endblock body %}
+
+
