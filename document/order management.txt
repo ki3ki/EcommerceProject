@@ -1,0 +1,108 @@
+order management
+ create a new app order and add at the installed app
+ create models for the order app
+from django.db import models
+from django.conf import settings
+from store.models import Variant
+
+class Order(models.Model):
+    ORDER_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('PROCESSING', 'Processing'),
+        ('SHIPPED', 'Shipped'),
+        ('DELIVERED', 'Delivered'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    address = models.ForeignKey('accounts.Address', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='PENDING')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Order {self.id} - {self.user.username}"
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.variant.product.name} - {self.variant.color}"
+
+
+create a view
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Order, OrderItem
+from cart.models import Cart
+from .forms import OrderForm
+
+@login_required
+def create_order(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            cart = Cart.objects.get(user=request.user)
+            order.total_price = cart.get_total_price()
+            order.save()
+            
+            # Create OrderItems from CartItems
+            for cart_item in cart.items.all():
+                OrderItem.objects.create(
+                    order=order,
+                    variant=cart_item.variant,
+                    quantity=cart_item.quantity,
+                    price=cart_item.variant.price
+                )
+            
+            # Clear the cart
+            cart.items.all().delete()
+            
+            return redirect('order_detail', order_id=order.id)
+    else:
+        form = OrderForm()
+    return render(request, 'orders/create_order.html', {'form': form})
+
+@login_required
+def order_list(request):
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'orders/order_list.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'orders/order_detail.html', {'order': order})
+
+forms.py
+
+
+from django import forms
+from .models import Order
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['address']
+
+
+urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('create/', views.create_order, name='create_order'),
+    path('list/', views.order_list, name='order_list'),
+    path('<int:order_id>/', views.order_detail, name='order_detail'),
+]
+
+main urls
+
+path('orders/', include('orders.urls')), 
+
+ 

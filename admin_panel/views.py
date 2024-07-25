@@ -5,9 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.forms import formset_factory, modelformset_factory
 from store.models import Category, Brand, Product, Variant, ProductImage
+from orders.models import Order, OrderItem
 from .forms import ProductForm, CategoryForm, VariantForm, BrandForm
 from PIL import Image
 import os, json
+
+
+
 
 
 User = get_user_model()
@@ -195,3 +199,55 @@ def delete_variant(request, variant_id):
     variant = get_object_or_404(Variant, id=variant_id)
     variant.delete()
     return redirect('admin_panel:manage_variants')
+
+
+@login_required
+def manage_orders(request):
+    orders = Order.objects.all().order_by('-created_at')
+    return render(request, 'admin_panel/manage_orders.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'admin_panel/order_detail.html', {'order': order})
+
+@login_required
+def change_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Order.ORDER_STATUS_CHOICES):
+            order.status = new_status
+            order.save()
+            messages.success(request, f'Order status updated to {new_status}')
+        else:
+            messages.error(request, 'Invalid status')
+    return redirect('admin_panel:order_detail', order_id=order.id)
+
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        order.status = 'cancelled'
+        order.save()
+        messages.success(request, 'Order cancelled successfully')
+    return redirect('admin_panel:order_detail', order_id=order.id)
+
+@login_required
+def manage_inventory(request):
+    variants = Variant.objects.all().order_by('product__name', 'color')
+    return render(request, 'admin_panel/manage_inventory.html', {'variants': variants})
+
+@login_required
+def update_stock(request, variant_id):
+    variant = get_object_or_404(Variant, id=variant_id)
+    if request.method == 'POST':
+        new_stock = request.POST.get('stock')
+        try:
+            new_stock = int(new_stock)
+            variant.stock = new_stock
+            variant.save()
+            messages.success(request, f'Stock updated for {variant.product.name} - {variant.color}')
+        except ValueError:
+            messages.error(request, 'Invalid stock value')
+    return redirect('admin_panel:manage_inventory')

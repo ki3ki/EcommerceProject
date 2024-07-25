@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Variants</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.scss' %}">
+    <style>
+        .sidebar {
+            height: 100%;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #575d63;
+        }
+        .main-content {
+            margin-left: 200px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'admin_panel:dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_panel:manage_users' %}">Manage Users</a>
+        <a href="{% url 'admin_panel:manage_categories' %}">Manage Categories</a>
+        <a href="{% url 'admin_panel:brand_list' %}">Manage Brands</a>
+        <a href="{% url 'admin_panel:manage_products' %}">Manage Products</a>
+        <a href="{% url 'admin_panel:manage_variants' %}">Manage Variants</a>
+        <a href="{% url 'admin_panel:logout' %}">Logout</a>
+    </div>
+    <div class="main-content">
+        <h2>Order Detail</h2>
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>User:</strong> {{ order.user.username }}</p>
+        <p><strong>Total Amount:</strong> {{ order.total_amount }}</p>
+        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+        <p><strong>Created At:</strong> {{ order.created_at }}</p>
+
+        <h3>Order Items</h3>
+
+
+  <table class="table table-striped">
+            <thead>
+        <tr>
+            <th>Product</th>
+            <th>Variant</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order.items.all %}
+        <tr>
+            <td>{{ item.variant.product.name }}</td>
+            <td>{{ item.variant.color }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+ </table>
+ <h3>Change Order Status</h3>
+ <form method="post" action="{% url 'admin_panel:change_order_status' order.id %}">
+     {% csrf_token %}
+     <select name="status" class="form-control">
+         {% for status, display in order.ORDER_STATUS_CHOICES %}
+         <option value="{{ status }}" {% if status == order.status %}selected{% endif %}>{{ display }}</option>
+         {% endfor %}
+     </select>
+     <button type="submit" class="btn btn-primary mt-2">Update Status</button>
+ 
+</div>
+</body>
+</html>

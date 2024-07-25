@@ -1,6 +1,11 @@
 from django.db import models
 from django.conf import settings
 from store.models import Variant
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
+
 
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [

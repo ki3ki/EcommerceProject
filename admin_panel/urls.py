@@ -29,4 +29,10 @@ urlpatterns = [
     path('add_variant/<int:product_id>/', add_variant, name='add_variant'),
     path('edit_variant/<int:variant_id>/', views.edit_variant, name='edit_variant'),
     path('delete_variant/<int:variant_id>/', views.delete_variant, name='delete_variant'),
+    path('manage_orders/', views.manage_orders, name='manage_orders'),
+    path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('change_order_status/<int:order_id>/', views.change_order_status, name='change_order_status'),
+    path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
+    path('manage_inventory/', views.manage_inventory, name='manage_inventory'),
+    path('update_stock/<int:variant_id>/', views.update_stock, name='update_stock'),
 ]

@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.scss' %}">
+    <style>
+        .sidebar {
+          height: 100%;
+          width: 200px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          background-color: #343a40;
+          padding-top: 20px;
+        }
+        .sidebar a {
+          padding: 10px 15px;
+          text-decoration: none;
+          font-size: 18px;
+          color: white;
+          display: block;
+        }
+        .sidebar a:hover {
+          background-color: #575d63;
+        }
+        .main-content {
+          margin-left: 200px;
+          padding: 20px;
+        }
+      </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'admin_panel:dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_panel:manage_users' %}">Manage Users</a>
+        <a href="{% url 'admin_panel:manage_categories' %}">Manage Categories</a>
+        <a href="{% url 'admin_panel:brand_list' %}">Manage Brands</a>
+        <a href="{% url 'admin_panel:manage_products' %}">Manage Products</a>
+        <a href="{% url 'admin_panel:manage_variants' %}">Manage Variants</a>
+        <a href="{% url 'admin_panel:logout' %}">Logout</a>
+      </div>
+    <div class="main-content">
+        <h1>Manage Inventory</h1>
+    
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                  
+                    <th>Product</th>
+                    <th>Variant</th>
+                    <th>Current Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for variant in variants %}
+                <tr>
+                    <td>{{ variant.product.name }}</td>
+                    <td>{{ variant.color }}</td>
+                    <td>{{ variant.stock }}</td>
+                    <td>
+                        <form method="post" action="{% url 'admin_panel:update_stock' variant.id %}" class="form-inline">
+                            {% csrf_token %}
+                            <input type="number" name="stock" value="{{ variant.stock }}" class="form-control form-control-sm mr-2" min="0">
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
