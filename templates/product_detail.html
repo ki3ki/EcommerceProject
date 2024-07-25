@@ -8,202 +8,190 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            padding: 20px;
-            font-family: 'Arial', sans-serif;
-            color: #333;
-        }
-        
-        .carousel-item img {
-            height: 500px;
-            object-fit: cover;
-        }
-        
-        h1, h2, h3, p {
-            margin-bottom: 1rem;
-        }
-        
-        .list-unstyled {
-            padding: 0;
-        }
-        
-        .list-unstyled li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .carousel-item img {
-            max-height: 400px;
-            width: auto;
-            object-fit: contain;
-            margin: 0 auto;
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        .carousel-item img:hover {
-            transform: scale(1.05);
-        }
-        
-        .carousel-indicators img {
-            max-height: 60px;
-            width: auto;
-            object-fit: cover;
-        }
-        
-        .carousel-indicators {
-            position: static;
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            padding: 0;
-        }
-        
-        .carousel-indicators li {
-            width: auto;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-        
-        .product-details {
-            padding: 20px;
-        }
-        
-        .carousel-inner {
-            text-align: center; /* Center the carousel content */
-            max-height: 400px; /* Ensure the carousel does not exceed this height */
-        }
-        
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 5%; /* Reduce the width of the controls */
-        }
-        
-        .variant-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .variant-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-        
-        .variant-size,
-        .variant-price,
-        .variant-stock {
-            margin-right: 10px;
-        }
-        
-        .variant-button {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .variant-price,
-        .variant-stock {
-            margin-left: 10px;
-        }
-        
-        /* Styles for product detail */
-        .product-detail {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .breadcrumbs {
-            margin-bottom: 20px;
-        }
-        
-        .product-gallery {
-            width: 60%;
-            margin-bottom: 20px;
-        }
-        
-        .product-gallery img {
-            width: 100%;
-        }
-        
-        .product-info {
-            width: 60%;
-        }
-        
-        .price {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .discount {
-            text-decoration: line-through;
-            color: red;
-        }
-        
-        .stock-status {
-            margin: 10px 0;
-        }
-        
-        .description,
-        .product-specs,
-        .reviews,
-        .related-products {
-            margin-top: 20px;
-        }
-        
-        .rating {
-            color: #f8ce0b;
-        } /* Color for ratings */
-        
-        .review {
-            margin-bottom: 15px;
-        }
-        
-        .related-product {
-            margin-top: 20px;
-        }
-        
-        /* Layout Padding */
-        .layout_padding {
-            padding: 60px 0;
-        }
-        
-        /* Category Banner Section */
-        .category_banner_section .banner {
-            position: relative;
-            height: 85vh; /* 1/2 of the viewport height */
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: flex-end; /* Align items at the bottom */
-            justify-content: flex-start; /* Align items to the left */
-            color: #fff;
-            text-align: left;
-            padding: 20px;
-            padding-bottom: 40px; /* Additional bottom padding */
-        }
-        
-        .category_banner_section .banner h1 {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 0;
-            color: #fff;
-        }
-        
-        .category_banner_section .banner p {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0 0;
-            color: #fff;
-        }
+        <style>
+            body {
+                background-color: #f8f9fa;
+                padding: 20px;
+                font-family: 'Arial', sans-serif;
+                color: #333;
+            }
+            
+            .carousel-item img {
+                height: 500px;
+                object-fit: cover;
+            }
+            
+            h1, h2, h3, p {
+                margin-bottom: 1rem;
+            }
+            
+            .list-unstyled {
+                padding: 0;
+            }
+            
+            .list-unstyled li {
+                margin-bottom: 0.5rem;
+            }
+            
+            .carousel-item img {
+                max-height: 400px;
+                width: auto;
+                object-fit: contain;
+                margin: 0 auto;
+                transition: transform 0.2s ease-in-out;
+            }
+            
+            .carousel-item img:hover {
+                transform: scale(1.05);
+            }
+            
+            .carousel-indicators img {
+                max-height: 60px;
+                width: auto;
+                object-fit: cover;
+            }
+            
+            .carousel-indicators {
+                position: static;
+                margin-top: 10px;
+                display: flex;
+                justify-content: center;
+                padding: 0;
+            }
+            
+            .carousel-indicators li {
+                width: auto;
+                cursor: pointer;
+                margin: 0 5px;
+                display: flex;
+                justify-content: center;
+                padding: 0;
+                display: inline-block;
+                transition: background-color 0.15s ease-in-out, box-shadow 0.3s ease-in-out;
+            }
+            
+            .product-details {
+                padding: 20px;
+            }
+            
+            .carousel-inner {
+                text-align: center; /* Center the carousel content */
+                max-height: 400px; /* Ensure the carousel does not exceed this height */
+            }
+            
+            .carousel-control-prev,
+            .carousel-control-next {
+                width: 5%; /* Reduce the width of the controls */
+            }
+            .variant-item {
+                cursor: pointer;
+                background-color: #f8f9fa;
+                border: 1px solid #ced4da;
+                padding: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                text-align: center;
+                transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                border-radius: 5px;
+                margin-right: 10px;
+            }
+            
+            .variant-item:hover {
+                background-color: #e9ecef;
+            }
+            
+            .variant-color {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin-right: 5px;
+            }
+            
+            .variant-size,
+            .variant-price,
+            .variant-stock {
+                margin-right: 10px;
+            }
+            
+            .variant-button {
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                margin-bottom: 5px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            
+            .variant-price,
+            .variant-stock {
+                margin-left: 10px;
+            }
+            
+            /* Styles for product detail */
+            .product-detail {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .breadcrumbs {
+                margin-bottom: 20px;
+            }
+            
+            .product-gallery {
+                width: 60%;
+                margin-bottom: 20px;
+            }
+            
+            .product-gallery img {
+                width: 100%;
+            }
+            
+            .product-info {
+                width: 60%;
+            }
+            
+            .price {
+                font-size: 24px;
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .discount {
+                text-decoration: line-through;
+                color: red;
+            }
+            
+            .stock-status {
+                margin: 10px 0;
+            }
+            
+            .description,
+            .product-specs,
+            .reviews,
+            .related-products {
+                margin-top: 20px;
+            }
+            
+            .rating {
+                color: #f8ce0b;
+            } /* Color for ratings */
+            
+            .review {
+                margin-bottom: 15px;
+            }
+            
+            .related-product {
+                margin-top: 20px;
+            }
+            
+            /* Layout Padding */
+            .layout_padding {
+                padding: 60px 0;
+            }
+            
         
         /* Category Detail Section */
         .category_detail_section .product_box {
@@ -277,159 +265,163 @@
             transform: scale(1.1); /* Scale up on hover */
             transition: transform 0.3s ease;
         }
+        .product-details .variant-button {
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .product-details .variant-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .product-details .variant-price {
+            margin-left: 10px;
+        }
+        
         
             
     </style>
 </head>
+    
 <body>
     <!-- Navbar -->
     {% include 'inc/nav.html' %}
-    <div class="container mt-5 product-details">
-        <div class="row">
-            <div class="col-lg-6 col-md-12 mb-4">
-                <!-- Product Image Carousel -->
-                <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        {% for image in product.variant.images.all %}
-                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                            <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.name }}">
-                        </div>
-                        {% endfor %}
+
+<div class="container mt-5 product-details">
+    <div class="row">
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in product.variant.images.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.name }}">
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                    <!-- Slider Navigation -->
-                    <div class="carousel-indicators">
-                        {% for image in product.variant.images.all %}
-                        <li data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}">
-                            <img src="{{ image.image.url }}" alt="{{ product.name }}">
-                        </li>
-                        {% endfor %}
-                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                <div class="carousel-indicators">
+                    {% for image in product.variant.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ product.name }}">
+                    {% endfor %}
                 </div>
             </div>
-            <div class="col-lg-6 col-md-12">
-                <h1>{{ product.name }}</h1>
-                <p class="lead">{{ product.description }}</p>
-                <h3 class="text-muted">Category: {{ product.category.name }}</h3>
-                <h2>${{ product.variant.price }}</h2>  
-                <p><strong>Stock:</strong> {{ product.variant.stock }}</p> 
-                <button class="btn btn-primary btn-lg mb-2 add-to-cart-button" data-variant-id="{{ product.variant.id }}">Add to Cart</button> 
-                <button class="btn btn-outline-secondary btn-lg mb-2">Add to WishList</button>
-            </div>
-            
         </div>
-        <hr>
-        <div class="row mt-5">
-            <div class="col-12">
-                <h2 id="variantPrice">${{ variant.price }}</h2>  
-                <p><strong>Stock:</strong> <span id="variantStock">{{ variant.stock }}</span></p>
-                <li><strong>Color:</strong> 
-                    <span class="variant-color" id="variantColor" style="background-color: {{ variant.color }};"></span>
-                    <span id="variantColorText">{{ variant.color }}</span>
-                </li>
-                
-            </div>
+
+        <div class="col-lg-6 col-md-12">
+            <h1>{{ product.name }}</h1>
+            <p>{{ product.description }}</p>
+            <h3 class="text-muted">Category: {{ product.category.name }}</h3>
+            <h2 id="variantPrice">${{ product.variant.price }}</h2>
+            <p><strong>Stock:</strong> <span id="variantStock">{{ product.variant.stock }}</span></p>
+
+            <form id="add-to-cart-form" data-variant-id="{{ product.variant.id }}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.variant.stock }}" class="form-control" style="width: 100px;">
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
+            </form>
+
+            <button class="btn btn-secondary mt-3">Add to WishList</button>
         </div>
-        
-        <input type="hidden" id="productSlug" value="{{ product.slug }}">
-
-        <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
-
-        
-        <div class="row mt-3">
-            <div class="col-12">
-                <h3>Available Variants</h3>
-                <ul class="list-unstyled">
-                    {% for v in variants %}
-<li>
-    <button 
-        class="btn btn-primary btn-lg mb-2 variant-button" 
-        data-variant-id="{{ v.id }}"
-        data-variant-price="{{ v.price }}"
-        data-variant-stock="{{ v.stock }}"
-        data-variant-color="{{ v.color }}">
-        <span class="variant-color" style="background-color: {{ v.color }};"></span>
-        {{ v.name }}
-        <span class="variant-price">${{ v.price }}</span>
-    </button>
-</li>
-{% empty %}
-<li>No variants available</li>
-{% endfor %}
-
-                </ul>
-            </div>
-        </div>
-        
-        
     </div>
-   
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const csrfToken = document.getElementById('csrfToken').value;
-            const productSlug = document.getElementById('productSlug').value; 
+
+    <hr>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Available Variants</h3>
+            <div id="variants-container">
+                {% for v in product.variants.all %}
+                <div class="variant-item" data-variant-id="{{ v.id }}">
+                    <span class="variant-color" style="background-color: {{ v.color }};"></span>
+                    {{ v.color }} - ${{ v.price }}
+                </div>
+                {% empty %}
+                <p>No variants available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#add-to-cart-form').on('submit', function(e) {
+        e.preventDefault();
+        var variantId = $(this).data('variant-id');
+        var quantity = $('#quantity').val();
         
-            // Event Delegation for Variant Buttons
-            document.addEventListener('click', (event) => {
-                if (event.target.classList.contains('variant-button')) {
-                    console.log('Variant button clicked!');
-                    const button = event.target;
-                    updateVariant(button);
+        $.ajax({
+            url: "{% url 'cart:add_to_cart' 0 %}".replace('0', variantId),
+            type: "POST",
+            data: {
+                'variant_id': variantId,
+                'quantity': quantity,
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert('Added to cart!');
+                    // Update cart count in the navbar if you have one
+                    // $('#cart-count').text(response.cart_count);
+                } else {
+                    alert('Error: ' + response.message);
                 }
-            });
-        
-            const addToCartButton = document.querySelector('.add-to-cart-button');
-            if (addToCartButton) {
-                addToCartButton.addEventListener('click', () => {
-                    const variantId = addToCartButton.dataset.variantId;
-                    addToCart(variantId);
-                });
-            }
-        
-            function addToCart(variantId) {
-                fetch('/add_to_cart/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({ variant_id: variantId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Variant added to cart successfully');
-                    } else {
-                        alert('Error adding variant to cart');
-                    }
-                });
-            }
-        
-            function updateVariant(button) {
-                const price = button.getAttribute('data-variant-price');
-                const stock = button.getAttribute('data-variant-stock');
-                const color = button.getAttribute('data-variant-color');
-    
-                document.getElementById('variantPrice').textContent = '$' + price;
-                document.getElementById('variantStock').textContent = stock;
-                document.getElementById('variantColor').style.backgroundColor = color;
-                document.getElementById('variantColorText').textContent = color;
-    
-                // Optionally, update the Add to Cart button's data-variant-id attribute
-                document.querySelector('.add-to-cart-button').setAttribute('data-variant-id', button.getAttribute('data-variant-id'));
+            },
+            error: function(xhr, errmsg, err) {
+                console.log(errmsg);
+                alert('Error adding to cart. Please try again.');
             }
         });
-        
+    });
+
+    // Update product details when a variant is clicked
+    $('.variant-item').on('click', function() {
+        var variantId = $(this).data('variant-id');
+        var productSlug = '{{ product.slug }}';
+        $.ajax({
+            url: "/store/update_variant/" + productSlug + "/" + variantId + "/",
+            type: "POST",
+            data: {
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#variantPrice').text('$' + response.price);
+                    $('#variantStock').text(response.stock);
+                    $('#add-to-cart-form').data('variant-id', response.variant_id);
+                    $('#quantity').attr('max', response.stock);
+                } else {
+                    alert('Error updating variant details');
+                }
+            },
+            error: function(xhr, errmsg, err) {
+                console.log(errmsg);
+                alert('Error updating variant details. Please try again.');
+            }
+        });
+    });
+});
 </script>
+    
 </body>
+
+
+
 </html>
 

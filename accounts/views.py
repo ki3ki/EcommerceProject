@@ -1,18 +1,18 @@
 # accounts/views.py
-
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
-import random
-from .forms import RegisterForm, LoginForm
-from .models import User
-from django.contrib.auth import authenticate, login
-from django.contrib.auth import logout
+from .forms import RegisterForm, LoginForm, UserProfileForm, AddressForm
+from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from dateutil.parser import parse
-from django.contrib.auth.models import User as AuthUser
 from django.core.exceptions import ObjectDoesNotExist
+from .models import User, Address
+import random
+from django.contrib.auth.decorators import login_required
+ 
+
 
 def generate_otp():
     otp = random.randint(100000, 999999)
@@ -133,3 +133,86 @@ def user_logout(request):
 
 def home(request):
     return render(request, 'index.html')
+
+@login_required
+def view_profile(request):
+    return render(request, 'accounts/view_profile.html', {'user': request.user})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('accounts:view_profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+    return render(request, 'accounts/edit_profile.html', {'form': form})
+
+@login_required
+def manage_addresses(request):
+    addresses = Address.objects.filter(user=request.user)
+    return render(request, 'accounts/manage_addresses.html', {'addresses': addresses})
+
+@login_required
+def add_address(request):
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            messages.success(request, 'Address added successfully.')
+            return redirect('accounts:manage_addresses')
+    else:
+        form = AddressForm()
+    return render(request, 'accounts/address_form.html', {'form': form})
+
+@login_required
+def edit_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    if request.method == 'POST':
+        form = AddressForm(request.POST, instance=address)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Address updated successfully.')
+            return redirect('accounts:manage_addresses')
+    else:
+        form = AddressForm(instance=address)
+    return render(request, 'accounts/address_form.html', {'form': form})
+
+@login_required
+def delete_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    address.delete()
+    messages.success(request, 'Address deleted successfully.')
+    return redirect('accounts:manage_addresses')
+
+@login_required
+def set_default_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    address.is_default = True
+    address.save()
+    return redirect('accounts:manage_addresses')
+
+@login_required
+def view_orders(request):
+    # Implement order viewing logic here
+    # orders = Order.objects.filter(user=request.user)
+    # return render(request, 'accounts/view_orders.html', {'orders': orders})
+    pass
+
+@login_required
+def cancel_order(request, order_id):
+    # Implement order cancellation logic here
+    # order = get_object_or_404(Order, id=order_id, user=request.user)
+    # order.status = 'Cancelled'
+    # order.save()
+    # messages.success(request, 'Order cancelled successfully.')
+    # return redirect('accounts:view_orders')
+    pass
+
+def forgot_password(request):
+    # Implement forgot password logic here
+    pass

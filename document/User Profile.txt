@@ -1,0 +1,132 @@
+User Profile
+--Update the user models in accounts/models.py
+
+class Address(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    address_line1 = models.CharField(max_length=100)
+    address_line2 = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    postal_code = models.CharField(max_length=10)
+    country = models.CharField(max_length=50)
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.address_line1}, {self.city}, {self.state}, {self.country}"
+
+    class Meta:
+        verbose_name_plural = "Addresses"
+
+--Update accounts/forms.py to include forms for editing profile and managing addresses:
+
+from django import forms
+from .models import User, Address
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['full_name', 'phone', 'birth_date']
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['address_line1', 'address_line2', 'city', 'state', 'postal_code', 'country']
+
+--Update accounts/views.py to include new views for profile and address management:
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import User, Address
+from .forms import UserProfileForm, AddressForm
+
+# ... (keep existing views)
+
+@login_required
+def view_profile(request):
+    addresses = Address.objects.filter(user=request.user)
+    return render(request, 'accounts/view_profile.html', {'user': request.user, 'addresses': addresses})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('accounts:view_profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+    return render(request, 'accounts/edit_profile.html', {'form': form})
+
+@login_required
+def add_address(request):
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            messages.success(request, 'Address added successfully.')
+            return redirect('accounts:view_profile')
+    else:
+        form = AddressForm()
+    return render(request, 'accounts/address_form.html', {'form': form})
+
+@login_required
+def edit_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    if request.method == 'POST':
+        form = AddressForm(request.POST, instance=address)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Address updated successfully.')
+            return redirect('accounts:view_profile')
+    else:
+        form = AddressForm(instance=address)
+    return render(request, 'accounts/address_form.html', {'form': form})
+
+@login_required
+def delete_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    address.delete()
+    messages.success(request, 'Address deleted successfully.')
+    return redirect('accounts:view_profile')
+
+@login_required
+def set_default_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
+    address.is_default = True
+    address.save()
+    messages.success(request, 'Default address updated successfully.')
+    return redirect('accounts:view_profile')
+
+--Update accounts/urls.py to include new URL patterns:
+
+from django.urls import path
+from . import views
+
+app_name = 'accounts'
+
+urlpatterns = [
+    # ... (keep existing URL patterns)
+    path('profile/', views.view_profile, name='view_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('address/add/', views.add_address, name='add_address'),
+    path('address/edit/<int:address_id>/', views.edit_address, name='edit_address'),
+    path('address/delete/<int:address_id>/', views.delete_address, name='delete_address'),
+    path('address/set-default/<int:address_id>/', views.set_default_address, name='set_default_address'),
+]
+
+-- create new templates 
+view_profile.html
+edit_profile.html
+address_form.html
+
+
+
+from django.contrib.auth.models import User as AuthUser
+
+--
+

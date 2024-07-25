@@ -1,0 +1,63 @@
+{% extends 'layouts/main1.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container">
+   <nav aria-label="breadcrumb">
+     <ol class="breadcrumb">
+       <li class="breadcrumb-item"><a href="{%  url 'home' %}">Home</a></li>
+       <li class="breadcrumb-item active" aria-current="page">Cart</li>
+     </ol>
+   </nav>
+   <h2 class="my-4">Your Cart</h2>
+   
+   {% if cart.items.count > 0 %}
+     <table class="table">
+       <thead>
+         <tr>
+           <th scope="col">Product</th>
+           <th scope="col">Quantity</th>
+           <th scope="col">Total</th>
+           <th scope="col">Action</th>
+         </tr>
+       </thead>
+       <tbody>
+         {% for item in cart.items.all %}
+           <tr>
+             <td>{{ item.variant.name }} - {{ item.variant.color }}</td>
+             <td>{{ item.quantity }}</td>
+             <td>${{ item.get_total_price }}</td>
+             
+             <td>
+               <form method="post" action="{% url 'cart:update_cart' item.id %}">
+                 {% csrf_token %}
+                 <button type="submit" name="action" value="increase" class="btn btn-sm btn-primary">Increase</button>
+                 <button type="submit" name="action" value="decrease" class="btn btn-sm btn-secondary">Decrease</button>
+                 <a href="{% url 'cart:remove_from_cart' item.id %}" class="btn btn-sm btn-danger">Remove</a>
+               </form>
+             </td>
+           </tr>
+         {% endfor %}
+       </tbody>
+       <tfoot>
+        <tr>
+            <td colspan="2"><strong>Total:</strong></td>
+            <td colspan="2"><strong>${{ cart.get_total_price }}</strong></td>
+        </tr>
+      </tfoot>
+     </table>
+   {% else %}
+     <p class="lead">Your cart is empty.</p>
+   {% endif %}
+   
+   <div class="mt-4">
+     <a href="{% url 'category' %}" class="btn btn-primary">Continue Shopping</a>
+     {% if cart.items.count > 0 %}
+     <form action="{% url 'create_order' %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">Place Order</button>
+     </form>
+     {% endif %}
+   </div>
+ </div>
+{% endblock %}

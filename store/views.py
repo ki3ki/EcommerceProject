@@ -1,10 +1,12 @@
+#view file
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from .models import Category, Product, ProductImage, Variant, Brand
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import json
-# Create your views here.
+
+
 def home(request):
     return render(request, 'index.html')
 
@@ -79,6 +81,7 @@ def product_detail(request, slug):
         product.variant = None
         print("No default variant found")
 
+    # Pass all images to the template
     return render(request, 'product_detail.html', {'product': product, 'variants': variants, 'images': images, 'brand': product.brand})
 
 @csrf_exempt
@@ -99,3 +102,24 @@ def update_product_variant(request, product_slug, variant_id):
     
     print("Invalid request method or variant not found")
     return JsonResponse({'success': False}, status=400)
+
+def get_variant_details(request, product_slug, variant_id):
+    print("get_variant_details view is called")
+    product = get_object_or_404(Product, slug=product_slug, is_deleted=False)
+    variant = product.variants.filter(id=variant_id).first()
+
+    if variant:
+        print(f"Variant found: Color={variant.color}, Price={variant.price}, Stock={variant.stock}")
+        # Aggregate images for the variant
+        variant_images = list(ProductImage.objects.filter(variant=variant, is_deleted=False).values('image'))
+        response_data = {
+            'success': True,
+            'price': variant.price,
+            'stock': variant.stock,
+            'color': variant.color,
+            'images': variant_images,  # Include images in the response
+        }
+        return JsonResponse(response_data)
+    
+    print("Variant not found")
+    return JsonResponse({'success': False}, status=404)

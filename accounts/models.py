@@ -83,3 +83,31 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         ordering = ('email',)
 
+
+class Address(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    address_line1 = models.CharField(max_length=100)
+    address_line2 = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    postal_code = models.CharField(max_length=10)
+    country = models.CharField(max_length=50)
+    is_default = models.BooleanField(default=False) 
+    #is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            # Set all other addresses of this user to non-default
+            Address.objects.filter(user=self.user).update(is_default=False)
+        elif not Address.objects.filter(user=self.user, is_default=True).exists():
+            # If no default address exists for this user, make this one default
+            self.is_default = True
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"{self.address_line1}, {self.city}, {self.state}, {self.country}"
+
+    class Meta:
+        verbose_name_plural = "Addresses"
+

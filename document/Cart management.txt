@@ -1,0 +1,143 @@
+Cart management
+
+-create a new app cart
+-add the new app to the settings.py file
+- models.py
+from django.db import models
+from django.contrib.auth.models import User
+from store.models import Variant
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('cart', 'variant')
+
+-view.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Cart, CartItem
+from store.models import Variant
+
+@login_required
+def add_to_cart(request, variant_id):
+    variant = get_object_or_404(Variant, id=variant_id)
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_item, item_created = CartItem.objects.get_or_create(cart=cart, variant=variant)
+    
+    if not item_created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    return JsonResponse({'status': 'success', 'cart_count': cart.items.count()})
+
+@login_required
+def view_cart(request):
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    return render(request, 'cart/view_cart.html', {'cart': cart})
+
+@login_required
+def update_cart(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    action = request.POST.get('action')
+    
+    if action == 'increase':
+        cart_item.quantity += 1
+    elif action == 'decrease':
+        cart_item.quantity -= 1
+    
+    if cart_item.quantity < 1:
+        cart_item.delete()
+    else:
+        cart_item.save()
+    
+    return redirect('view_cart')
+
+@login_required
+def remove_from_cart(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    cart_item.delete()
+    return redirect('view_cart')
+
+- create urls 
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('add/<int:variant_id>/', views.add_to_cart, name='add_to_cart'),
+    path('view/', views.view_cart, name='view_cart'),
+    path('update/<int:item_id>/', views.update_cart, name='update_cart'),
+    path('remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+]
+
+add url path to the main url
+
+- create templates for the cart view
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your Cart</h1>
+{% if cart.items.all %}
+  <ul>
+  {% for item in cart.items.all %}
+    <li>
+      {{ item.variant.product.name }} - {{ item.variant.color }}
+      Quantity: {{ item.quantity }}
+      <form method="post" action="{% url 'update_cart' item.id %}">
+        {% csrf_token %}
+        <button name="action" value="decrease">-</button>
+        <button name="action" value="increase">+</button>
+      </form>
+      <a href="{% url 'remove_from_cart' item.id %}">Remove</a>
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}
+
+- update product_detail page to add add to cart
+<form id="add-to-cart-form" data-variant-id="{{ product.variant.id }}">
+  {% csrf_token %}
+  <button type="submit">Add to Cart</button>
+</form>
+
+<script>
+$(document).ready(function() {
+  $('#add-to-cart-form').on('submit', function(e) {
+    e.preventDefault();
+    var variantId = $(this).data('variant-id');
+    $.post("{% url 'add_to_cart' 0 %}".replace('0', variantId), function(data) {
+      if (data.status === 'success') {
+        alert('Added to cart!');
+        $('#cart-count').text(data.cart_count);
+      }
+    });
+  });
+});
+</script>
+
+- admin_panel/views.py
+from django.contrib.admin.views.decorators import staff_member_required
+from cart.models import Cart
+
+@staff_member_required
+def admin_view_carts(request):
+    carts = Cart.objects.all().prefetch_related('items__variant__product')
+    return render(request, 'admin_panel/view_carts.html', {'carts': carts})
+- admin_panel urls
+path('carts/', views.admin_view_carts, name='admin_view_carts'),
+
+
