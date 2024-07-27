@@ -16,6 +16,7 @@
        <thead>
          <tr>
            <th scope="col">Product</th>
+           <th scope="col">Variant</th>
            <th scope="col">Quantity</th>
            <th scope="col">Total</th>
            <th scope="col">Action</th>
@@ -24,7 +25,8 @@
        <tbody>
          {% for item in cart.items.all %}
            <tr>
-             <td>{{ item.variant.name }} - {{ item.variant.color }}</td>
+            <td>{{ item.variant.product.name }}</td>
+             <td>{{ item.variant.color }}</td>
              <td>{{ item.quantity }}</td>
              <td>${{ item.get_total_price }}</td>
              

@@ -4,6 +4,8 @@ from .models import Order, OrderItem
 from cart.models import Cart
 from accounts.models import Address
 from .forms import OrderForm
+from store.models import Variant
+from django.db import transaction
 
 @login_required
 def create_order(request):
@@ -18,21 +20,38 @@ def create_order(request):
         address_id = request.POST.get('address')
         if address_id:
             address = get_object_or_404(Address, id=address_id, user=user)
-            order = Order.objects.create(
-                user=user,
-                address=address,
-                total_price=cart.get_total_price()
-            )
             
-            for cart_item in cart.items.all():
-                OrderItem.objects.create(
-                    order=order,
-                    variant=cart_item.variant,
-                    quantity=cart_item.quantity,
-                    price=cart_item.variant.price
+            with transaction.atomic():
+                # Check stock availability again before creating the order
+                for cart_item in cart.items.all():
+                    variant = Variant.objects.select_for_update().get(id=cart_item.variant.id)
+                    if cart_item.quantity > variant.available_stock():
+                        return render(request, 'orders/create_order.html', {
+                            'cart': cart,
+                            'addresses': addresses,
+                            'error': f'Not enough stock for {variant.product.name} - {variant.color}'
+                        })
+                
+                order = Order.objects.create(
+                    user=user,
+                    address=address,
+                    total_price=cart.get_total_price()
                 )
-            
-            cart.items.all().delete()
+                
+                for cart_item in cart.items.all():
+                    variant = Variant.objects.get(id=cart_item.variant.id)
+                    OrderItem.objects.create(
+                        order=order,
+                        variant=variant,
+                        quantity=cart_item.quantity,
+                        price=variant.price
+                    )
+                    # Update actual stock and clear reserved quantity
+                    variant.stock -= cart_item.quantity
+                    variant.reserved_quantity -= cart_item.quantity
+                    variant.save()
+                
+                cart.items.all().delete()
             
             return redirect('order_detail', order_id=order.id)
         else:
@@ -46,6 +65,7 @@ def create_order(request):
             'cart': cart,
             'addresses': addresses
         })
+    
 
 @login_required
 def order_list(request):

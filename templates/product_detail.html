@@ -297,7 +297,7 @@
         <div class="col-lg-6 col-md-12 mb-4">
             <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                    {% for image in product.variant.images.all %}
+                    {% for image in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
                         <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.name }}">
                     </div>
@@ -312,8 +312,10 @@
                     <span class="visually-hidden">Next</span>
                 </button>
                 <div class="carousel-indicators">
-                    {% for image in product.variant.images.all %}
-                    <img src="{{ image.image.url }}" alt="{{ product.name }}">
+                    {% for image in images %}
+                    <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.counter }}">
+                        <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.name }}">
+                    </button>
                     {% endfor %}
                 </div>
             </div>
@@ -324,13 +326,13 @@
             <p>{{ product.description }}</p>
             <h3 class="text-muted">Category: {{ product.category.name }}</h3>
             <h2 id="variantPrice">${{ product.variant.price }}</h2>
-            <p><strong>Stock:</strong> <span id="variantStock">{{ product.variant.stock }}</span></p>
+            <p><strong>Stock:</strong> <span id="variantStock">{{product.variant.stock }}</span></p>
 
             <form id="add-to-cart-form" data-variant-id="{{ product.variant.id }}">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.variant.stock }}" class="form-control" style="width: 100px;">
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{product.variant.stock }}" class="form-control" style="width: 100px;">
                 </div>
                 <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
             </form>
@@ -345,7 +347,7 @@
         <div class="col-12">
             <h3>Available Variants</h3>
             <div id="variants-container">
-                {% for v in product.variants.all %}
+                {% for v in variants %}
                 <div class="variant-item" data-variant-id="{{ v.id }}">
                     <span class="variant-color" style="background-color: {{ v.color }};"></span>
                     {{ v.color }} - ${{ v.price }}
@@ -359,65 +361,97 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-$(document).ready(function() {
-    $('#add-to-cart-form').on('submit', function(e) {
-        e.preventDefault();
-        var variantId = $(this).data('variant-id');
-        var quantity = $('#quantity').val();
-        
-        $.ajax({
-            url: "{% url 'cart:add_to_cart' 0 %}".replace('0', variantId),
-            type: "POST",
-            data: {
-                'variant_id': variantId,
-                'quantity': quantity,
-                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    alert('Added to cart!');
-                    // Update cart count in the navbar if you have one
-                    // $('#cart-count').text(response.cart_count);
-                } else {
-                    alert('Error: ' + response.message);
+    $(document).ready(function() {
+        // Add to cart functionality (unchanged)
+        $('#add-to-cart-form').on('submit', function(e) {
+            e.preventDefault();
+            var variantId = $(this).data('variant-id');
+            var quantity = $('#quantity').val();
+            
+            $.ajax({
+                url: "{% url 'cart:add_to_cart' 0 %}".replace('0', variantId),
+                type: "POST",
+                data: {
+                    'variant_id': variantId,
+                    'quantity': quantity,
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Added to cart!');
+                        // Update cart count in the navbar if you have one
+                        // $('#cart-count').text(response.cart_count);
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    console.log(errmsg);
+                    alert('Error adding to cart. Please try again.');
                 }
-            },
-            error: function(xhr, errmsg, err) {
-                console.log(errmsg);
-                alert('Error adding to cart. Please try again.');
-            }
+            });
         });
-    });
-
-    // Update product details when a variant is clicked
-    $('.variant-item').on('click', function() {
-        var variantId = $(this).data('variant-id');
-        var productSlug = '{{ product.slug }}';
-        $.ajax({
-            url: "/store/update_variant/" + productSlug + "/" + variantId + "/",
-            type: "POST",
-            data: {
-                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#variantPrice').text('$' + response.price);
-                    $('#variantStock').text(response.stock);
-                    $('#add-to-cart-form').data('variant-id', response.variant_id);
-                    $('#quantity').attr('max', response.stock);
-                } else {
-                    alert('Error updating variant details');
+    
+        // Update product details when a variant is clicked (modified)
+        $('.variant-item').on('click', function() {
+            var variantId = $(this).data('variant-id');
+            var productSlug = '{{ product.slug }}';
+            
+            $.ajax({
+                url: `/get-variant-details/${productSlug}/${variantId}/`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        // Update price and stock (unchanged)
+                        $('#variantPrice').text('$' + response.price);
+                        $('#variantStock').text(response.stock);
+                       
+                        $('#quantity').attr('max', response.stock);
+                        
+                        // Update carousel images (modified)
+                        updateCarousel(response.images);
+                        
+                        // NEW: Update the selected variant ID for the add to cart form
+                        $('#add-to-cart-form').data('variant-id', variantId);
+                        console.log('Variant details updated:', response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('An error occurred:', error);
                 }
-            },
-            error: function(xhr, errmsg, err) {
-                console.log(errmsg);
-                alert('Error updating variant details. Please try again.');
-            }
+            });
         });
+    
+        // NEW: Function to update carousel
+        function updateCarousel(images) {
+            var carouselInner = $('#productCarousel .carousel-inner');
+            var carouselIndicators = $('#productCarousel .carousel-indicators');
+            
+            carouselInner.empty();
+            carouselIndicators.empty();
+            
+            images.forEach(function(image, index) {
+                var activeClass = index === 0 ? 'active' : '';
+                carouselInner.append(`
+                    <div class="carousel-item ${activeClass}">
+                        <img src="${image.image}" class="d-block w-100" alt="${image.alt || ''}">
+                    </div>
+                `);
+                carouselIndicators.append(`
+                    <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="${index}"
+                        class="${activeClass}" aria-current="${index === 0 ? 'true' : 'false'}" aria-label="Slide ${index + 1}">
+                        <img src="${image.image}" class="d-block w-100" alt="${image.alt || ''}">
+                    </button>
+                `);
+            });
+            
+            // Reinitialize the carousel
+            var carousel = new bootstrap.Carousel(document.querySelector('#productCarousel'));
+        }
     });
-});
-</script>
+    </script>     
     
 </body>
 

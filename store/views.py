@@ -67,6 +67,7 @@ def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_deleted=False)
     print(f"Product found: {product.name}")
 
+    
     variants = product.variants.filter(is_deleted=False)
     images = ProductImage.objects.filter(variant__product=product, is_deleted=False)
 
@@ -82,7 +83,12 @@ def product_detail(request, slug):
         print("No default variant found")
 
     # Pass all images to the template
-    return render(request, 'product_detail.html', {'product': product, 'variants': variants, 'images': images, 'brand': product.brand})
+    return render(request, 'product_detail.html', {
+        'product': product,
+        'variants': variants,  # Pass all variants to the template
+        'images': images,      # Pass all images to the template
+        'brand': product.brand
+    })
 
 @csrf_exempt
 def update_product_variant(request, product_slug, variant_id):
@@ -103,6 +109,8 @@ def update_product_variant(request, product_slug, variant_id):
     print("Invalid request method or variant not found")
     return JsonResponse({'success': False}, status=400)
 
+from django.conf import settings
+
 def get_variant_details(request, product_slug, variant_id):
     print("get_variant_details view is called")
     product = get_object_or_404(Product, slug=product_slug, is_deleted=False)
@@ -111,13 +119,13 @@ def get_variant_details(request, product_slug, variant_id):
     if variant:
         print(f"Variant found: Color={variant.color}, Price={variant.price}, Stock={variant.stock}")
         # Aggregate images for the variant
-        variant_images = list(ProductImage.objects.filter(variant=variant, is_deleted=False).values('image'))
+        variant_images = ProductImage.objects.filter(variant=variant, is_deleted=False)
         response_data = {
             'success': True,
-            'price': variant.price,
+            'price': str(variant.price),
             'stock': variant.stock,
             'color': variant.color,
-            'images': variant_images,  # Include images in the response
+            'images': [{'image': request.build_absolute_uri(image.image.url)} for image in variant_images],
         }
         return JsonResponse(response_data)
     
