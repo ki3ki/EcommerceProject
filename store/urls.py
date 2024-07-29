@@ -9,6 +9,7 @@ urlpatterns = [
     #path('update_product_variant/<slug:slug>/<int:variant_id>/', views.update_product_variant, name='update_product_variant'),
     path('update_product_variant/<slug:product_slug>/<int:variant_id>/', views.update_product_variant, name='update_product_variant'),
     path('get-variant-details/<str:product_slug>/<int:variant_id>/', views.get_variant_details, name='get_variant_details'),
+    path('advanced-search/', views.advanced_search, name='advanced_search'),
    
 
 ]

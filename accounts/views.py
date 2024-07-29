@@ -152,7 +152,7 @@ def edit_profile(request):
 
 @login_required
 def manage_addresses(request):
-    addresses = Address.objects.filter(user=request.user)
+    addresses = Address.objects.filter(user=request.user,is_deleted=False )
     return render(request, 'accounts/manage_addresses.html', {'addresses': addresses})
 
 @login_required
@@ -185,7 +185,8 @@ def edit_address(request, address_id):
 @login_required
 def delete_address(request, address_id):
     address = get_object_or_404(Address, id=address_id, user=request.user)
-    address.delete()
+    address.is_deleted = True
+    address.save()
     messages.success(request, 'Address deleted successfully.')
     return redirect('accounts:manage_addresses')
 
@@ -195,23 +196,6 @@ def set_default_address(request, address_id):
     address.is_default = True
     address.save()
     return redirect('accounts:manage_addresses')
-
-@login_required
-def view_orders(request):
-    # Implement order viewing logic here
-    # orders = Order.objects.filter(user=request.user)
-    # return render(request, 'accounts/view_orders.html', {'orders': orders})
-    pass
-
-@login_required
-def cancel_order(request, order_id):
-    # Implement order cancellation logic here
-    # order = get_object_or_404(Order, id=order_id, user=request.user)
-    # order.status = 'Cancelled'
-    # order.save()
-    # messages.success(request, 'Order cancelled successfully.')
-    # return redirect('accounts:view_orders')
-    pass
 
 def forgot_password(request):
     # Implement forgot password logic here

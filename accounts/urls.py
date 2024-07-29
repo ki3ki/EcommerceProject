@@ -18,8 +18,8 @@ urlpatterns = [
     path('profile/addresses/edit/<int:address_id>/', views.edit_address, name='edit_address'),
     path('profile/addresses/delete/<int:address_id>/', views.delete_address, name='delete_address'),
     path('set-default-address/<int:address_id>/', views.set_default_address, name='set_default_address'),
-    path('profile/orders/', views.view_orders, name='view_orders'),
-    path('profile/orders/cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
+    #path('profile/orders/', views.view_orders, name='view_orders'),
+    #path('profile/orders/cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
 
 

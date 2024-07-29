@@ -30,7 +30,7 @@
                <!-- Displaying the first product's image and details -->
                <div class="img-box">
                   {% if category.first_image %}
-                  <img src="{{ product.first_image.image.url }}" alt="{{ product.name }}">
+                  <img src="{{ category.first_image.image.url }}" alt="{{ product.name }}">
 
                   {% else %}
                   <img src="{% static 'images/no_image_available.png' %}" alt="No Image">

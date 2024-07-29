@@ -98,7 +98,7 @@ class LoginForm(AuthenticationForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['full_name', 'phone']
+        fields = ['full_name', 'phone', 'username']
 
 class AddressForm(forms.ModelForm):
     class Meta:

@@ -54,6 +54,10 @@ class Product(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True) 
     is_featured = models.BooleanField(default=False)
+    popularity = models.IntegerField(default=0)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    featured = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null = True, blank=True )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -70,6 +74,9 @@ class Product(models.Model):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.save()
+    
+    def get_price(self):
+        return self.variants.aggregate(min_price=models.Min('price'))['min_price']
 
 
     def __str__(self):

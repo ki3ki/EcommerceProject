@@ -1,0 +1,76 @@
+{% extends 'layouts/main1.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Advanced Search</h1>
+    <form method="get" action="{% url 'advanced_search' %}">
+        <div class="form-group">
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search products...">
+        </div>
+        <div class="form-group">
+            <label for="sort_by">Sort by:</label>
+            <select name="sort_by" id="sort_by" class="form-control">
+                <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Popularity</option>
+                <option value="price_low_to_high" {% if sort_by == 'price_low_to_high' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high_to_low" {% if sort_by == 'price_high_to_low' %}selected{% endif %}>Price: High to Low</option>
+                <option value="average_rating" {% if sort_by == 'average_rating' %}selected{% endif %}>Average Rating</option>
+                <option value="featured" {% if sort_by == 'featured' %}selected{% endif %}>Featured</option>
+                <option value="new_arrivals" {% if sort_by == 'new_arrivals' %}selected{% endif %}>New Arrivals</option>
+                <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A to Z</option>
+                <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name: Z to A</option>
+            </select>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" name="show_out_of_stock" id="show_out_of_stock" class="form-check-input" {% if show_out_of_stock %}checked{% endif %}>
+            <label for="show_out_of_stock" class="form-check-label">Show out of stock products</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="row mt-5">
+        {% for product in products %}
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                {% if product.first_image %}
+                    <img src="{{ product.first_image.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'images/no_image_available.png' %}" class="card-img-top" alt="No Image">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.get_price|floatformat:2 }}</p>
+                    <a href="{% url 'product_detail' product.slug %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>No products found.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if products.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if products.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}&q={{ query }}&sort_by={{ sort_by }}&show_out_of_stock={{ show_out_of_stock|yesno:'on,off' }}">Previous</a></li>
+            {% endif %}
+
+            {% for i in products.paginator.page_range %}
+                {% if products.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}&q={{ query }}&sort_by={{ sort_by }}&show_out_of_stock={{ show_out_of_stock|yesno:'on,off' }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if products.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}&q={{ query }}&sort_by={{ sort_by }}&show_out_of_stock={{ show_out_of_stock|yesno:'on,off' }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

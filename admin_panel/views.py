@@ -1,7 +1,7 @@
 # admin_panel/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,  user_passes_test
 from django.contrib import messages
 from django.forms import formset_factory, modelformset_factory
 from store.models import Category, Brand, Product, Variant, ProductImage
@@ -28,9 +28,15 @@ def admin_login(request):
             messages.error(request, 'Invalid credentials or not an admin')
     return render(request, 'admin_panel/admin_login.html')
 
+def admin_required(view_func):
+    decorated_view_func = login_required(user_passes_test(lambda u : u.is_staff, login_url= 'admin_panel : login ')(view_func))
+    return decorated_view_func
+
+@admin_required  
 @login_required
 def admin_dashboard(request):
     return render(request, 'admin_panel/admin_dashboard.html')
+
 
 def admin_logout(request):
     logout(request)

@@ -28,7 +28,7 @@ def create_order(request):
                     available_stock = variant.available_stock()
                     print(f'Checking variant: {variant} with available stock: {variant.available_stock}, requested quantity: {cart_item.quantity}')
                     print(f'Checking variant: {variant} with available stock: {available_stock}, requested quantity: {cart_item.quantity}')
-                    if variant.available_stock() < 0:
+                    if cart_item.quantity > variant.available_stock():
                         return render(request, 'orders/create_order.html', {
                             'cart': cart,
                             'addresses': addresses,

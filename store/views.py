@@ -4,6 +4,8 @@ from django.shortcuts import render, get_object_or_404
 from .models import Category, Product, ProductImage, Variant, Brand
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Min
+from django.core.paginator import Paginator
 import json
 
 
@@ -27,7 +29,7 @@ def collections(request):
                 print(f"First variant in product: {category.first_variant.color}")
                 category.first_image = category.first_variant.images.filter(is_deleted=False).first()
                 if category.first_image:
-                    print(f'First image URL: {category.first_image.image.url}')
+                    print(f'First image URL: {category.first_image.image}')
                 else:
                     print('No image found for this variant')
             else:
@@ -80,13 +82,13 @@ def product_detail(request, slug):
         product.variant = default_variant
     else:
         product.variant = None
-        print("No default variant found")
+        print("No variant found")
 
     # Pass all images to the template
     return render(request, 'product_detail.html', {
         'product': product,
-        'variants': variants,  # Pass all variants to the template
-        'images': images,      # Pass all images to the template
+        'variants': variants,  
+        'images': images,      
         'brand': product.brand
     })
 
@@ -131,3 +133,53 @@ def get_variant_details(request, product_slug, variant_id):
     
     print("Variant not found")
     return JsonResponse({'success': False}, status=404)
+
+
+
+def advanced_search(request):
+    query = request.GET.get('q', '')
+    sort_by = request.GET.get('sort_by', 'popularity')
+    show_out_of_stock = request.GET.get('show_out_of_stock', 'off') == 'on'
+
+    products = Product.objects.filter(is_deleted=False).annotate(min_price=Min('variants__price'))
+
+    if query:
+        products = products.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(category__name__icontains=query) |
+            Q(brand__name__icontains=query)
+        )
+
+    if not show_out_of_stock:
+        products = products.filter(variants__stock__gt=0)
+
+    if sort_by == 'price_low_to_high':
+        products = products.order_by('min_price')
+    elif sort_by == 'price_high_to_low':
+        products = products.order_by('-min_price')
+    elif sort_by == 'average_rating':
+        products = products.order_by('-average_rating')
+    elif sort_by == 'featured':
+        products = products.filter(featured=True)
+    elif sort_by == 'new_arrivals':
+        products = products.order_by('-created_at')
+    elif sort_by == 'name_asc':
+        products = products.order_by('name')
+    elif sort_by == 'name_desc':
+        products = products.order_by('-name')
+    else:  # Default to popularity
+        products = products.order_by('-popularity')
+
+    paginator = Paginator(products, 12)  # Show 12 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'products': page_obj,
+        'query': query,
+        'sort_by': sort_by,
+        'show_out_of_stock': show_out_of_stock,
+    }
+
+    return render(request, 'advanced_search.html', context)
