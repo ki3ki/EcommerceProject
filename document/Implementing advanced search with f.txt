@@ -1,3 +1,0 @@
-Implementing advanced search with filters.
-- Update the product model in models
-- create a new view

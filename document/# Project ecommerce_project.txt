@@ -1,6 +1,0 @@
-# Project: ecommerce_project
-- **Virtual Environment**: travel
-- **Description**: E-commerce platform using Django.
-- **Commands**:
-  - Activate virtual environment: `source travel/bin/activate` (Linux/Mac) or `travel\Scripts\activate` (Windows).
-  - Run server: `python manage.py runserver`.
