@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="{% static 'images/traveltrolley.jpg' %}" type="">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
   <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
@@ -44,6 +45,11 @@
     <a href="{% url 'admin_panel:manage_variants' %}">Manage Variants</a>
     <a href="{% url 'admin_panel:manage_orders' %}">Manage Orders</a></li>
     <a href="{% url 'admin_panel:manage_inventory' %}">Manage Inventory</a></li>
+    <a href="{% url 'admin_panel:manage_coupons' %}" class="nav-link">
+          <i class="fas fa-tags"></i> Manage Coupons
+    </a>
+    <a href="{% url 'admin_panel:manage_blogs' %}">Manage Blogs</a>
+  
     <a href="{% url 'admin_panel:logout' %}">Logout</a>
   </div>
   <div class="main-content">

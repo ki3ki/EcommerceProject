@@ -6,14 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }}</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">  
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <style>
             body {
                 background-color: #f8f9fa;
                 padding: 20px;
-                font-family: 'Arial', sans-serif;
+                font-family: 'Montserrat', sans-serif;
                 color: #333;
+                overflow-x: hidden;
             }
             
             .carousel-item img {
@@ -326,9 +328,16 @@
             <p>{{ product.description }}</p>
             <h3 class="text-muted">Category: {{ product.category.name }}</h3>
             <h2 id="variantPrice">${{ product.variant.price }}</h2>
+            <script>
+                console.log("Stock before the loop: {{ product.variant.stock }}");
+            </script>
+            {% if product.variant.stock > 0 %}
             <p><strong>Stock:</strong> <span id="variantStock">{{product.variant.stock }}</span></p>
+            <script>
+                console.log("Stock inside the loop: {{ product.variant.stock }}");
+            </script>
 
-            <form id="add-to-cart-form" data-variant-id="{{ product.variant.id }}">
+            <form id="add-to-cart-form" data-variant-id="{{ product.variant.id }}" {% if product.variant.stock == 0 %}style="display:none;"{% endif %}>
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="quantity">Quantity:</label>
@@ -337,20 +346,27 @@
                 <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
             </form>
 
-            <button class="btn btn-secondary mt-3">Add to WishList</button>
+            {% else %}
+            <p class="text-danger">Out of stock</p>
+
+            {% endif %}
+            <form method="post" action="{% url 'cart:add_to_wishlist' product.variant.id %}" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary">Add to Wishlist</button>
+            </form>
+            <div id="wishlist-message" class="mt-2"></div>   
         </div>
     </div>
 
-    <hr>
-
+   
     <div class="row mt-5">
         <div class="col-12">
-            <h3>Available Variants</h3>
-            <div id="variants-container">
+            <h3>Colours Available</h3>
+            <div id="variants-container" class="d-flex flex-wrap">
                 {% for v in variants %}
                 <div class="variant-item" data-variant-id="{{ v.id }}">
                     <span class="variant-color" style="background-color: {{ v.color }};"></span>
-                    {{ v.color }} - ${{ v.price }}
+                    ${{ v.price }}
                 </div>
                 {% empty %}
                 <p>No variants available</p>
@@ -361,10 +377,11 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Add to cart functionality (unchanged)
+        // Add to cart functionality 
         $('#add-to-cart-form').on('submit', function(e) {
             e.preventDefault();
             var variantId = $(this).data('variant-id');
@@ -394,7 +411,7 @@
             });
         });
     
-        // Update product details when a variant is clicked (modified)
+        // Update product details when a variant is clicked 
         $('.variant-item').on('click', function() {
             var variantId = $(this).data('variant-id');
             var productSlug = '{{ product.slug }}';
@@ -415,6 +432,12 @@
                         
                         // NEW: Update the selected variant ID for the add to cart form
                         $('#add-to-cart-form').data('variant-id', variantId);
+                        // Show or hide add to cart form based on stock status
+                        if (response.stock > 0) {
+                            $('#add-to-cart-form').show();
+                        } else {
+                            $('#add-to-cart-form').hide();
+                        }   
                         console.log('Variant details updated:', response);
                     }
                 },
@@ -451,6 +474,32 @@
             var carousel = new bootstrap.Carousel(document.querySelector('#productCarousel'));
         }
     });
+    document.addEventListener('DOMContentLoaded', function() {
+        const wishlistForm = document.querySelector('form[action^="{% url 'cart:add_to_wishlist' 0 %}"]');
+        const wishlistMessage = document.getElementById('wishlist-message');
+
+        wishlistForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {
+                    'X-CSRFToken': this.querySelector('input[name="csrfmiddlewaretoken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                wishlistMessage.textContent = data.message;
+                wishlistMessage.className = 'mt-2 alert ' + (data.status === 'success' ? 'alert-success' : 'alert-info');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                wishlistMessage.textContent = 'An error occurred. Please try again.';
+                wishlistMessage.className = 'mt-2 alert alert-danger';
+            });
+        });
+    });
+
     </script>     
     
 </body>

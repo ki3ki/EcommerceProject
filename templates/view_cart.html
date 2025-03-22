@@ -2,62 +2,18 @@
 {% load static %}
 
 {% block body %}
-<style>
-/* Updated button styles for brighter colors */
-.btn-soft-primary {
-    background-color: #80bfff; /* Brighter blue */
-    color: #003366;
-    border: 1px solid #66b3ff;
-}
 
-.btn-soft-secondary {
-    background-color: #d6d8db; /* Brighter gray */
-    color: #383d41;
-    border: 1px solid #bfc1c3;
-}
-
-.btn-soft-danger {
-    background-color: #ff9999; /* Brighter red */
-    color: #661a1a;
-    border: 1px solid #ff6666;
-}
-
-.btn-soft-success {
-  background-color: #ff9999; /* Brighter red */
-  color: #661a1a;
-  border: 1px solid #ff6666;
-}
-
-/* Added light yellow button variant */
-.btn-soft-warning {
-    background-color: #ffffb3; /* Light yellow */
-    color: #666633;
-    border: 1px solid #ffff80;
-}
-
-/* Added light red button variant */
-.btn-soft-light-danger {
-    background-color: #ffb3b3; /* Light red */
-    color: #661a1a;
-    border: 1px solid #ff8080;
-}
-
-/* Ensure buttons are on the same level */
-.d-flex.align-items-center {
-    align-items: center;
-}
-</style>
 
 <div class="container">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'category' %}">Collections</a></li>
-            <li class="breadcrumb-item"><a href="#">Luggages and Bags</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Cart</li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-danger">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'category' %}" class="text-danger">Collections</a></li>
+            <li class="breadcrumb-item"><a href="#" class="text-danger">Luggages and Bags</a></li>
+            <li class="breadcrumb-item active" aria-current="page" class="text-danger">Cart</li>
         </ol>
     </nav>
-    <h2 class="my-4">Your Cart</h2>
+    <h2 class="my-4 text-danger">Items in Cart</h2>
     
     {% if cart.items.count > 0 %}
         <table class="table">
@@ -81,9 +37,9 @@
                             <form method="post" action="{% url 'cart:update_cart' item.id %}">
                                 {% csrf_token %}
                                 <!-- Updated button classes for brighter colors -->
-                                <button type="submit" name="action" value="increase" class="btn btn-sm btn-soft-primary">Increase</button>
-                                <button type="submit" name="action" value="decrease" class="btn btn-sm btn-soft-secondary">Decrease</button>
-                                <a href="{% url 'cart:remove_from_cart' item.id %}" class="btn btn-sm btn-soft-danger">Remove</a>
+                                <button type="submit" name="action" value="increase" class="btn btn-warning">Increase</button>
+                                <button type="submit" name="action" value="decrease" class="btn btn-warning">Decrease</button>
+                                <a href="{% url 'cart:remove_from_cart' item.id %}" class="btn btn-danger">Remove</a>
                             </form>
                         </td>
                     </tr>
@@ -102,17 +58,42 @@
     <div class="d-flex justify-content-between align-items-center">
         <!-- Ensure buttons are on the same level -->
         <div class="mt-4">
-            <a href="{% url 'category' %}" class="btn btn-soft-success">Continue Shopping</a>
+            <a href="{% url 'category' %}"  class="btn btn-outline-danger">Continue Shopping</a>
         </div>
         <div class="mt-4">
             {% if cart.items.count > 0 %}
             <form action="{% url 'create_order' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-soft-primary">Place Order</button>
+                <button type="submit"  class="btn btn-outline-danger">Proceed to Checkout</button>
             </form>
             {% endif %}
         </div>
     </div>
 </div>
+<!-- arrival section -->
+<section class="arrival_section" style="background: linear-gradient(to bottom, #e8e8e8, #dcdcdc);">
+    <div class="container">
+        <div class="box">
+            <div class="arrival_bg_box">
+                <img src=" {% static 'images/shop3.jpg' %}" alt="">
+            </div>
+            <div class="row ">
+                <div class="col-md-6 ml-auto">
+                    <div class="heading_container remove_line_bt">
+                        <h2 class="text-danger">NewArrivals</h2>
+                    </div>
+                    <p style="margin-top: 20px;margin-bottom: 30px;">
+                      "Travel smart with our latest arrivals. Upgrade your gear for the journey of a lifetime!"
+                    </p>
+                    <a href="{% url 'category' %}">
+                        Shop Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+ <!-- end arrival section -->
 {% endblock %}
 

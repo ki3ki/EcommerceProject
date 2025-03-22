@@ -22,6 +22,7 @@
       <link href="{% static 'css/style.css' %}" rel="stylesheet" />
       <!-- responsive style -->
       <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
    </head>
    <body class="sub_page">
       <div class="hero_area">
@@ -56,9 +57,24 @@
                               <div class="alert alert-danger">{{ message }}</div>
                            {% endfor %}
                         {% endif %}
-                        <button type="submit" class="btn btn-primary">Login</button>
+                        <div class="text-center">
+                        <button type="submit"  class="btn btn-outline-danger">Login</button>
+                        </div>
                      </form>
-                     <a href="{% url 'accounts:user_register' %}">Register</a>
+
+                     <div class="text-center mt-3">
+                        <a href="{% url 'accounts:password_reset' %}" class="text-warning">
+                           <p>Forgot Password?</p>
+                        </a>
+                     </div>
+                     <hr class="my-4">
+
+                     <div class="text-center">
+                        <p class="mb-2">Don't have an account yet?</p>
+                        <a href="{% url 'accounts:user_register' %}" class="btn btn-outline-danger">
+                           Register Now
+                        </a>
+                     </div>
                   </div>
                </div>
             </div>

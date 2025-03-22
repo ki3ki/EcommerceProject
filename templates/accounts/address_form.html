@@ -22,6 +22,7 @@
       <link href="{%  static 'css/style.css' %}" rel="stylesheet" />
       <!-- responsive style -->
       <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
    </head>
    <body class="sub_page">
       <div class="hero_area">
@@ -63,7 +64,7 @@
                         <form method="post">
                             {% csrf_token %}
                             {{ form.as_p }}
-                            <button type="submit" class="btn btn-primary">Save Address</button>
+                            <button type="submit" class="btn btn-danger">Save Address</button>
                         </form>
                     </div>
                 </div>

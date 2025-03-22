@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'images/traveltrolley1.jpg' %}" type="">
     <title>Manage Users</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.scss' %}">
+    <!--<link rel="stylesheet" href="{% static 'css/style.scss' %}"> -->
     <style>
         .sidebar {
           height: 100%;
@@ -56,6 +57,7 @@
                     <th>Email</th>
                     <th>Status</th>
                     <th>Action</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -66,6 +68,9 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.is_active|yesno:"Active,Inactive" }}</td>
                     <td>
+                        <a href="{% url 'admin_panel:view_user_details' user.id %}" class="btn btn-info">
+                            View Details
+                        </a>
                         <a href="{% url 'admin_panel:toggle_user_status' user.id %}" class="btn btn-primary">
                             {% if user.is_active %}Block{% else %}Unblock{% endif %}
                         </a>

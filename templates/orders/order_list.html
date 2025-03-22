@@ -24,7 +24,7 @@
                         <td>{{ order.get_status_display }}</td>
                         <td>${{ order.total_price }}</td>
                         <td>
-                            <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-primary">View Details</a>
+                            <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-warning">View Details</a>
                         </td>
                     </tr>
                     {% endfor %}

@@ -35,7 +35,7 @@
                 {% if product.first_image %}
                     <img src="{{ product.first_image.image.url }}" class="card-img-top" alt="{{ product.name }}">
                 {% else %}
-                    <img src="{% static 'images/no_image_available.png' %}" class="card-img-top" alt="No Image">
+                    <img src="{% static 'images/travel.png' %}" class="card-img-top" alt="No Image">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ product.name }}</h5>

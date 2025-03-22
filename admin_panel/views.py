@@ -5,11 +5,15 @@ from django.contrib.auth.decorators import login_required,  user_passes_test
 from django.contrib import messages
 from django.forms import formset_factory, modelformset_factory
 from store.models import Category, Brand, Product, Variant, ProductImage
-from orders.models import Order, OrderItem
+from orders.models import Order, OrderItem, Wallet
+from accounts.models import Address
+from coupons.models import Coupon
+from coupons.forms import CouponForm
+from .models import Blog
+from .forms import BlogForm
 from .forms import ProductForm, CategoryForm, VariantForm, BrandForm
 from PIL import Image
 import os, json
-
 
 
 
@@ -33,7 +37,6 @@ def admin_required(view_func):
     return decorated_view_func
 
 @admin_required  
-@login_required
 def admin_dashboard(request):
     return render(request, 'admin_panel/admin_dashboard.html')
 
@@ -42,24 +45,38 @@ def admin_logout(request):
     logout(request)
     return redirect('admin_panel:login')
 
-@login_required
+@admin_required
 def manage_users(request):
     users = User.objects.all()
     return render(request, 'admin_panel/manage_users.html', {'users': users})
 
-@login_required
+@admin_required
+def view_user_details(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    addresses = Address.objects.filter(user=user)
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+    wallet = Wallet.objects.filter(user=user).first() 
+    return render(request, 'admin_panel/user_details.html', {
+        'user': user, 
+        'addresses': addresses,
+        'orders': orders,
+        'wallet': wallet
+    })
+
+
+@admin_required
 def toggle_user_status(request, user_id):
     user = User.objects.get(id=user_id)
     user.is_active = not user.is_active
     user.save()
     return redirect('admin_panel:manage_users')
 
-@login_required
+@admin_required
 def manage_categories(request):
     categories = Category.objects.filter(is_deleted=False)
     return render(request, 'admin_panel/manage_categories.html', {'categories': categories})
 
-@login_required
+@admin_required
 def add_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST, request.FILES)
@@ -70,7 +87,7 @@ def add_category(request):
         form = CategoryForm()
     return render(request, 'admin_panel/add_category.html', {'form': form})
 
-@login_required
+@admin_required
 def edit_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     if request.method == 'POST':
@@ -82,19 +99,19 @@ def edit_category(request, category_id):
         form = CategoryForm(instance=category)
     return render(request, 'admin_panel/edit_category.html', {'form': form, 'category': category})
 
-@login_required
+@admin_required
 def delete_category(request, category_id):
     category = Category.objects.get(id=category_id)
     category.is_deleted = True
     category.save()
     return redirect('admin_panel:manage_categories')
 
-@login_required
+@admin_required
 def manage_products(request):
     products = Product.objects.filter(is_deleted=False)
     return render(request, 'admin_panel/manage_products.html', {'products': products})
 
-@login_required
+@admin_required
 def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
@@ -105,7 +122,7 @@ def add_product(request):
         form = ProductForm()
     return render(request, 'admin_panel/add_product.html', {'form': form})
 
-@login_required
+@admin_required
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == 'POST':
@@ -117,7 +134,7 @@ def edit_product(request, product_id):
         form = ProductForm(instance=product)
     return render(request, 'admin_panel/edit_product.html', {'form': form})
 
-@login_required
+@admin_required
 def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     
@@ -126,15 +143,15 @@ def delete_product(request, product_id):
         product.save()
         return redirect('admin_panel:manage_products')
     
-@login_required
+@admin_required
 def brand_list(request):
     brands = Brand.objects.all()
     return render(request, 'admin_panel/brand_list.html', {'brands': brands})
 
-@login_required
+@admin_required
 def add_brand(request):
     if request.method == 'POST':
-        form = BrandForm(request.POST)
+        form = BrandForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('admin_panel:brand_list')
@@ -142,7 +159,7 @@ def add_brand(request):
         form = BrandForm()
     return render(request, 'admin_panel/add_brand.html', {'form': form})
 
-@login_required
+@admin_required
 def edit_brand(request, brand_id):
     brand = get_object_or_404(Brand, id=brand_id)
     if request.method == 'POST':
@@ -154,7 +171,7 @@ def edit_brand(request, brand_id):
         form = BrandForm(instance=brand)
     return render(request, 'admin_panel/edit_brand.html', {'form': form, 'brand': brand})
 
-@login_required
+@admin_required
 def delete_brand(request, brand_id):
     brand = Brand.objects.get(id=brand_id)
     brand.delete()
@@ -207,17 +224,17 @@ def delete_variant(request, variant_id):
     return redirect('admin_panel:manage_variants')
 
 
-@login_required
+@admin_required
 def manage_orders(request):
     orders = Order.objects.all().order_by('-created_at')
     return render(request, 'admin_panel/manage_orders.html', {'orders': orders})
 
-@login_required
+@admin_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'admin_panel/order_detail.html', {'order': order})
 
-@login_required
+@admin_required
 def change_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':
@@ -230,7 +247,7 @@ def change_order_status(request, order_id):
             messages.error(request, 'Invalid status')
     return redirect('admin_panel:order_detail', order_id=order.id)
 
-@login_required
+@admin_required
 def cancel_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':
@@ -239,12 +256,12 @@ def cancel_order(request, order_id):
         messages.success(request, 'Order cancelled successfully')
     return redirect('admin_panel:order_detail', order_id=order.id)
 
-@login_required
+@admin_required
 def manage_inventory(request):
     variants = Variant.objects.all().order_by('product__name', 'color')
     return render(request, 'admin_panel/manage_inventory.html', {'variants': variants})
 
-@login_required
+@admin_required
 def update_stock(request, variant_id):
     variant = get_object_or_404(Variant, id=variant_id)
     if request.method == 'POST':
@@ -257,3 +274,78 @@ def update_stock(request, variant_id):
         except ValueError:
             messages.error(request, 'Invalid stock value')
     return redirect('admin_panel:manage_inventory')
+
+
+def manage_coupons(request):
+    coupons = Coupon.objects.all()
+    return render(request, 'admin_panel/manage_coupons.html', {'coupons': coupons})
+
+def add_coupon(request):
+    if request.method == 'POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_panel:manage_coupons')
+    else:
+        form = CouponForm()
+    return render(request, 'admin_panel/add_coupon.html', {'form': form})
+
+def edit_coupon(request, coupon_id):
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    if request.method == 'POST':
+        form = CouponForm(request.POST, instance=coupon)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_panel:manage_coupons')
+    else:
+        form = CouponForm(instance=coupon)
+    return render(request, 'admin_panel/add_coupon.html', {'form': form})
+
+def delete_coupon(request, coupon_id):
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    coupon.delete()
+    return redirect('admin_panel:manage_coupons')
+
+# List and Manage Blogs
+def manage_blogs(request):
+    blogs = Blog.objects.all().order_by('-created_at')
+    return render(request, 'admin_panel/manage_blogs.html', {'blogs': blogs})
+
+# Add New Blog
+def add_blog(request):
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog added successfully!")
+            return redirect('admin_panel:manage_blogs')
+        else:
+            messages.error(request, "Error adding blog. Please check the form.")
+    else:
+        form = BlogForm()
+    return render(request, 'admin_panel/add_blog.html', {'form': form})
+
+# Edit Blog
+def edit_blog(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES, instance=blog)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog updated successfully!")
+            return redirect('admin_panel:manage_blogs')
+        else:
+            messages.error(request, "Error updating blog. Please check the form.")
+    else:
+        form = BlogForm(instance=blog)
+    return render(request, 'admin_panel/edit_blog.html', {'form': form, 'blog': blog})
+
+# Delete Blog
+def delete_blog(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    blog.delete()
+    messages.success(request, "Blog deleted successfully!")
+    return redirect('manage_blogs')
+
+
+

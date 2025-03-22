@@ -30,6 +30,7 @@ Stock
 Proper error handles Sold out / unavailable  and  out of stock EXAMPLE
 Highlights / specs of product 
 Related product recommendations
+
 User profile(Show user details, show address, show orders, edit profile, cancel orders, forgot password).
 Add address management in user profile( Multiple Address, Add, Edit, Delete).
 Cart management (Add to cart, list products in cart, remove products from cart)

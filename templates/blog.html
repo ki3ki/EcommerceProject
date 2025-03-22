@@ -1,0 +1,140 @@
+{% extends 'layouts/main1.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Card styles */
+.blog-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: 0.3s;
+    margin-bottom: 20px;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+}
+
+.blog-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.blog-card-body {
+    padding: 15px;
+    text-align: center;
+}
+
+.blog-card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.blog-card a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.blog-card a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock extra_css %}
+
+{% block body %}
+
+<!-- Product section for Blogs -->
+<section class="product_section layout_padding">
+   <div class="container">
+      <!-- Section Heading -->
+      <div class="heading_container heading_center" style="text-align: center; margin-bottom: 30px;">
+         <h2 style="color: #FFD700; font-size: 40px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px;">
+            Stories from <span style="color: #FFA500;">Around the World!</span>
+         </h2>
+      </div>
+
+      <!-- Blog Cards Grid -->
+      <div class="row">
+         {% for blog in blogs %}
+         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="box">
+               <!-- Blog Image with Link -->
+               <div class="option_container">
+                  <div class="options">
+                     <a href="{% url 'blog_detail' blog.slug %}" class="option1">
+                        Read More
+                     </a>
+                  </div>
+               </div>
+
+               <!-- Blog Image -->
+               <div class="img-box">
+                  {% if blog.cover_image %}
+                  <a href="{% url 'blog_detail' blog.slug %}">
+                     <img src="{{ blog.cover_image.url }}" alt="{{ blog.title }}" class="brand-image" style="height: 200px; width: 100%; object-fit: cover; border-radius: 8px;">
+                  </a>
+                  {% else %}
+                  <img src="{% static 'images/no_image_available.png' %}" alt="No Image" class="brand-image">
+                  {% endif %}
+               </div>
+
+               <!-- Blog Title Below Image -->
+               <div class="detail-box">
+                  <h5 style="font-size: 18px; font-weight: 600; margin-top: 10px; color: #FF7F50;">
+                     {{ blog.title|truncatechars:40 }}
+                  </h5>
+               </div>
+            </div>
+         </div>
+         {% empty %}
+         <div class="col-12 text-center">
+            <p>No blog posts available yet.</p>
+         </div>
+         {% endfor %}
+      </div>
+
+      <!-- View All Button -->
+      <div class="btn-box text-center mt-4">
+         <a href="#" class="option1" style="background-color: #FFD700; padding: 10px 20px; border-radius: 8px; color: #333; font-weight: bold; text-transform: uppercase;">
+            View All Blogs
+         </a>
+      </div>
+   </div>
+</section>
+
+
+
+<!-- end product section -->
+<!-- arrival section -->
+<section class="arrival_section" style="background: linear-gradient(to bottom, #e8e8e8, #dcdcdc);">
+   <div class="container">
+       <div class="box">
+           <div class="arrival_bg_box">
+               <img src=" {% static 'images/shop3.jpg' %}" alt="">
+           </div>
+           <div class="row ">
+               <div class="col-md-6 ml-auto">
+                   <div class="heading_container remove_line_bt">
+                       <h2 class="text-danger">NewArrivals</h2>
+                   </div>
+                   <p style="margin-top: 20px;margin-bottom: 30px;">
+                     "Travel smart with our latest arrivals. Upgrade your gear for the journey of a lifetime!"
+                   </p>
+                   <a href="{% url 'category' %}">
+                       Shop Now
+                   </a>
+               </div>
+           </div>
+       </div>
+   </div>
+</section>
+
+
+{% endblock body %}

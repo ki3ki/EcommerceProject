@@ -1,0 +1,71 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'images/traveltrolley1.jpg' %}" type="">
+    <title>Edit Category</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.scss' %}">
+    <style>
+        .sidebar {
+            height: 100%;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #575d63;
+        }
+        .main-content {
+            margin-left: 200px;
+            padding: 20px;
+            max-width: 800px;
+        }
+        .container {
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'admin_panel:dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_panel:manage_users' %}">Manage Users</a>
+        <a href="{% url 'admin_panel:manage_categories' %}">Manage Categories</a>
+        <a href="{% url 'admin_panel:brand_list' %}">Manage Brands</a>
+        <a href="{% url 'admin_panel:manage_products' %}">Manage Products</a>
+        <a href="{% url 'admin_panel:manage_variants' %}">Manage Variants</a>
+        <a href="{% url 'admin_panel:manage_orders' %}">Manage Orders</a></li>
+        <a href="{% url 'admin_panel:manage_inventory' %}">Manage Inventory</a></li>
+        <a href="{% url 'admin_panel:logout' %}">Logout</a>
+    </div>
+    
+    <div class="main-content">
+        <div class="container">
+            <h1>Add Coupon</h1>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Save Coupon</button>
+                <a href="{% url 'admin_panel:manage_coupons' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -105,4 +105,217 @@ main urls
 
 path('orders/', include('orders.urls')), 
 
+
+# create_order.html
+{% extends 'layouts/main1.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container mt-5">
+    {% if not error %}
+       <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h3>Order Summary</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart.items.all %}
+                    <tr>
+                        <td>{{ item.variant.product.name }} - {{ item.variant.color }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.get_total_price }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Total:</th>
+                    <th>${{ cart.get_total_price }}</th>
+                </tr>
+            </tfoot>
+        </table>
+
+
+
+
+
+
+
+        <h3>Select Delivery Address</h3>
+        {% if addresses %}
+            {% for address in addresses %}
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="address" id="address{{ address.id }}" value="{{ address.id }}" {% if address.is_default %}checked{% endif %}>
+                    <label class="form-check-label" for="address{{ address.id }}">
+                        {{ address.address_line1 }}, 
+                        {% if address.address_line2 %}{{ address.address_line2 }}, {% endif %}
+                        {{ address.city }}, {{ address.state }} {{ address.postal_code }}, {{ address.country }}
+                        {% if address.is_default %} (Default){% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No addresses found. Please add an address.</p>
+        {% endif %}
+
+        <a href="{% url 'accounts:add_address' %}" class="btn btn-secondary mb-3">Add New Address</a>
+        <h3 class="mb-3">Select Payment Method</h3>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="radio" name="payment_method" id="payment_razorpay" value="RAZORPAY" required>
+            <label class="form-check-label" for="payment_razorpay">
+                Online Payment
+            </label>
+        </div>
+        {% if wallet.balance > 0 %}
+            {% if wallet.balance >= cart.get_total_price %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="payment_method" id="payment_wallet" value="WALLET" required>
+                <label class="form-check-label" for="payment_wallet">
+                    Wallet (Balance: ${{ wallet.balance }})
+                </label>
+            </div>
+            {% else %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="payment_method" id="payment_wallet" value="WALLET" disabled>
+                <label class="form-check-label" for="payment_wallet">
+                    Wallet (Insufficient balance: ${{ wallet.balance }})
+                </label>
+            </div>
+            {% endif %}
+        {% endif %}
+        
+        
+        
+        
+        
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="radio" name="payment_method" id="payment_cod" value="COD" required>
+            <label class="form-check-label" for="payment_cod">
+                Cash on Delivery
+            </label>
+        </div>
+
+        
+
+        <button type="submit" class="btn btn-primary">Place Order</button>
+    </form>
+</div>
+{% endblock %}
+
+if request.method == "POST" and "apply_coupon" in request.POST:
+        coupon_code = request.POST.get("coupon_code", "").strip()
+        try:
+            coupon = Coupon.objects.get(code=coupon_code, active=True)
+
+            # Check coupon validity and conditions
+            if coupon.expiration_date < timezone.now():
+                error = "Coupon has expired."
+            elif CouponUsage.objects.filter(user=user, coupon=coupon).count() >= coupon.usage_limit:
+                error = "You have already used this coupon."
+            elif cart.get_total_price() < coupon.min_order_amount:
+                error = f"Minimum order amount to use this coupon is ₹{coupon.min_order_amount}."
+            else:
+                # Calculate discount
+                if coupon.discount_type == "percentage":
+                    discount = (coupon.discount_value / 100) * cart.get_total_price()
+                    if coupon.max_discount:
+                        discount = min(discount, coupon.max_discount)
+                else:
+                    discount = coupon.discount_value
+                
+                # Apply coupon
+                applied_coupon = coupon
+                request.session["applied_coupon"] = coupon.code  # Store the code
+                request.session["discount"] = float(discount)    # Store as float
+                messages.success(request, f"Coupon applied! You saved ${discount:.2f}")
+
+        except Coupon.DoesNotExist:
+            error = "Invalid coupon code."
+
+    # ✅ Get discount from session if coupon is applied
+    if request.session.get("applied_coupon"):
+        applied_coupon = Coupon.objects.filter(code=request.session["applied_coupon"], active=True).first()
+        discount = request.session.get("discount", 0)
+
+    # ✅ Calculate final total after discount
+    final_total = cart.get_total_price() - Decimal(str(discount))
+
+    if request.method == "POST" and "place_order" in request.POST:
+        # ✅ Continue with order placement logic
+        address_id = request.POST.get("address")
+        payment_method = request.POST.get("payment_method")
+
+        if not address_id:
+            error = "Please select an address."
+        elif not payment_method:
+            error = "Please select a payment method."
+        else:
+            address = get_object_or_404(Address, id=address_id, user=user)
+
+            with transaction.atomic():
+                # ✅ Check stock again before placing order
+                for cart_item in cart.items.all():
+                    variant = Variant.objects.select_for_update().get(id=cart_item.variant.id)
+                    if variant.available_stock() < cart_item.quantity:
+                        error = f"Not enough stock for {variant.product.name} - {variant.color}."
+                        break
+
+                if not error:
+                    # ✅ Create order with discount applied
+                    order = Order.objects.create(
+                        user=user,
+                        address=address,
+                        total_price=final_total,
+                        payment_method=payment_method,
+                        status="PENDING",
+                    )
+
+                    # ✅ Create order items and update stock
+                    for cart_item in cart.items.all():
+                        variant = Variant.objects.get(id=cart_item.variant.id)
+                        OrderItem.objects.create(
+                            order=order,
+                            variant=variant,
+                            quantity=cart_item.quantity,
+                            price=variant.price,
+                        )
+                        variant.stock -= cart_item.quantity
+                        variant.reserved_quantity -= cart_item.quantity
+                        variant.save()
+
+                    # ✅ Clear cart after placing order
+                    cart.items.all().delete()
+
+                    # ✅ Mark coupon as used
+                    if applied_coupon:
+                        CouponUsage.objects.create(user=user, coupon=applied_coupon)
+
+                    # ✅ Handle payment logic
+                    if payment_method == "RAZORPAY":
+                        return redirect("razorpay_payment", order_id=order.id)
+                    elif payment_method == "WALLET":
+                        if wallet.balance >= order.total_price:
+                            wallet.deduct_funds(order.total_price)
+                            order.payment_status = "COMPLETED"
+                            order.save()
+                            messages.success(request, f"Order #{order.id} placed using wallet balance.")
+                            return redirect("order_detail", order_id=order.id)
+                        else:
+                            order.delete()
+                            error = "Insufficient wallet balance. Please choose another payment method."
+                    elif payment_method == "COD":
+                        order.payment_status = "PENDING"
+                        order.save()
+                        return redirect("order_detail", order_id=order.id)
  

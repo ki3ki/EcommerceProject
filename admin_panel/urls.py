@@ -4,6 +4,8 @@ from .views import admin_login, admin_dashboard, manage_users, admin_logout, tog
 from .views import add_category, edit_category, delete_category , manage_categories
 from .views import manage_products, add_product, edit_product, delete_product
 from .views import manage_variants, add_variant
+from .views import manage_coupons, add_coupon, edit_coupon, delete_coupon
+from .views import manage_blogs, add_blog, edit_blog, delete_blog
 from . import views
 app_name = 'admin_panel'
 
@@ -11,6 +13,7 @@ urlpatterns = [
     path('login/', admin_login, name='login'),
     path('dashboard/', admin_dashboard, name='dashboard'),
     path('manage_users/', manage_users, name='manage_users'),
+    path('users/<int:user_id>/', views.view_user_details, name='view_user_details'),
     path('toggle_user_status/<int:user_id>/', toggle_user_status, name='toggle_user_status'),
     path('logout/', admin_logout, name='logout'),
     path('manage_categories/', manage_categories, name='manage_categories'),
@@ -35,4 +38,12 @@ urlpatterns = [
     path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
     path('manage_inventory/', views.manage_inventory, name='manage_inventory'),
     path('update_stock/<int:variant_id>/', views.update_stock, name='update_stock'),
+    path('coupons/', manage_coupons, name='manage_coupons'),
+    path('coupons/add/', add_coupon, name='add_coupon'),
+    path('coupons/edit/<int:coupon_id>/', edit_coupon, name='edit_coupon'),
+    path('coupons/delete/<int:coupon_id>/', delete_coupon, name='delete_coupon'),
+    path('manage_blogs/', manage_blogs, name='manage_blogs'),
+    path('add_blog/', add_blog, name='add_blog'),
+    path('edit_blog/<int:blog_id>/', edit_blog, name='edit_blog'),
+    path('delete_blog/<int:blog_id>/', delete_blog, name='delete_blog'),
 ]

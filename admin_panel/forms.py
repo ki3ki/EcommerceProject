@@ -1,4 +1,5 @@
 from django import forms
+from .models import Blog
 from store.models import Product, Variant, ProductImage, Category, Brand
 from .custom_widgets import MultipleFileInput
 
@@ -25,3 +26,12 @@ class BrandForm(forms.ModelForm):
     class Meta:
         model = Brand
         fields = ['name', 'image']
+
+class BlogForm(forms.ModelForm):
+    class Meta:
+        model = Blog
+        fields = ['title', 'slug', 'content', 'cover_image']
+
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }

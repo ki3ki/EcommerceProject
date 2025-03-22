@@ -76,7 +76,8 @@ class Product(models.Model):
         self.save()
     
     def get_price(self):
-        return self.variants.aggregate(min_price=models.Min('price'))['min_price']
+        price = self.variants.aggregate(min_price=models.Min('price'))['min_price']
+        return price if price else 0
 
 
     def __str__(self):

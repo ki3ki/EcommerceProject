@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'images/traveltrolley1.jpg' %}" type="">
     <title>Manage Variants</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
@@ -50,7 +51,7 @@
         <h2>Order Detail</h2>
         <p><strong>Order ID:</strong> {{ order.id }}</p>
         <p><strong>User:</strong> {{ order.user.username }}</p>
-        <p><strong>Total Amount:</strong> {{ order.total_amount }}</p>
+        <p><strong>Total Amount:</strong> {{ order.total_price }}</p>
         <p><strong>Status:</strong> {{ order.get_status_display }}</p>
         <p><strong>Created At:</strong> {{ order.created_at }}</p>
 

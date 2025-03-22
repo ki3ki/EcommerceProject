@@ -1,16 +1,43 @@
 {% extends 'layouts/main1.html' %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+.hero_area {
+    padding: 0;
+    margin: 0;
+}
+
+.product_section.layout_padding {
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* Ensure no padding/margin on body */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.container, .row, .col-sm-6, .col-md-4, .col-lg-4, .box, .option_container, .options, .img-box, .detail-box {
+    margin: 0;
+    padding: 0;
+}
+</style>
+{% endblock extra_css %}
+
 {% block body %}
 
 <!-- product section -->
 <section class="product_section layout_padding">
    <div class="container">
-      <div class="heading_container heading_center">
-         <h2>
-            Our <span>Collections</span>
+      <div class="heading_container heading_center" style="text-align: center; margin-bottom: 30px;">
+         <h2 style="color: #FFD700; font-size: 40px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px;">
+            Our <span style="color: #FFA500;">Collections</span>
          </h2>
       </div>
+      
+      <h2 class="section-heading" style="color: red;">Shop by Category</h2>
       <div class="row">
          {% for category in categories %}
          <div class="col-sm-6 col-md-4 col-lg-3">
@@ -66,6 +93,120 @@
          </div>
          {% endfor %}
       </div>
+      <h2 class="section-heading" style="color: red;">Shop by Brands</h2>
+      <div class="row">
+         {% for brand in brands %}
+         <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="box">
+               <div class="option_container">
+                  <div class="options">
+                     <!-- Linking to a brand detail or product listing page -->
+                     {% if brand.slug %}
+                     <a href="#" class="option1">
+                        {{ brand.name }}
+                     </a>
+                     {% else %}
+                     <span class="option1">{{ brand.name }}</span>
+                     {% endif %}
+                  </div>
+               </div>
+
+               <!-- Display brand image -->
+               <div class="img-box">
+                  {% if brand.image %}
+                  <img src="{{ brand.image.url }}" alt="{{ brand.name }}" class="brand-image" style="height: 150px; width: auto;">
+                  {% else %}
+                  <img src="{% static 'images/no_image_available.png' %}" alt="No Image" class="brand-image">
+                  {% endif %}
+               </div>
+
+         <!-- Brand name below image -->
+         <div class="detail-box">
+            <h5>
+               {{ brand.name }}
+            </h5>
+         </div>
+      </div>
+   </div>
+   {% endfor %}
+</div>
+
+<h2 class="section-heading" style="color: red;">Featured Products</h2>
+<div class="row">
+   {% for product in featured_products %}
+   <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="box">
+         <div class="option_container">
+            <div class="options">
+               {% if product.slug %}
+               <a href="{% url 'product_detail' product.slug %}" class="option1">
+                  {{ product.name }}
+               </a>
+               {% else %}
+               <span class="option1">{{ product.name }}</span>
+               {% endif %}
+            </div>
+         </div>
+
+         <!-- Display product image -->
+         <div class="img-box">
+            {% if product.first_image %}
+            
+            <img src="{{ product.first_image.image.url }}" alt="{{ product.name }}" class="product-image" style="height: 150px; width: auto;">
+            {% else %}
+            <img src="{% static 'images/no_image_available.png' %}" alt="No Image" class="product-image" style="height: 150px; width: auto;">
+            {% endif %}
+         </div>
+
+         <!-- Product name below image -->
+         <div class="detail-box">
+            <h5>
+               {{ product.name }}
+            </h5>
+         </div>
+      </div>
+   </div>
+   {% endfor %}
+</div>
+<h2 class="section-heading" style="color: red;"> Our Best Sellers</h2>
+<div class="row">
+   {% for product in best_seller_data %}
+   <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="box">
+         <div class="option_container">
+            <div class="options">
+               <!-- Check if slug exists for the product -->
+               {% if product.slug %}
+               <a href="{% url 'product_detail' product.slug %}" class="option1">
+                  {{ product.product_name }}
+               </a>
+               {% else %}
+               <span class="option1">{{ product.product_name }}</span>
+               {% endif %}
+            </div>
+         </div>
+
+         <!-- Display product image -->
+         <div class="img-box">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.product_name }}" class="product-image" style="height: 150px; width: auto;">
+            {% else %}
+            <img src="{% static 'images/no_image_available.png' %}" alt="No Image" class="product-image" style="height: 150px; width: auto;">
+            {% endif %}
+         </div>
+
+         <!-- Product name below the image -->
+         <div class="detail-box">
+            <h5>
+               {{ product.product_name }}
+            </h5>
+         </div>
+      </div>
+   </div>
+   {% endfor %}
+</div>
+
+
       <div class="btn-box">
          <a href="#">
             View All products
@@ -77,28 +218,3 @@
 
 
 {% endblock body %}
-
-{% block extra_css %}
-<style>
-.hero_area {
-    padding: 0;
-    margin: 0;
-}
-
-.product_section.layout_padding {
-    padding-top: 0;
-    margin-top: 0;
-}
-
-/* Ensure no padding/margin on body */
-body {
-    margin: 0;
-    padding: 0;
-}
-
-.container, .row, .col-sm-6, .col-md-4, .col-lg-4, .box, .option_container, .options, .img-box, .detail-box {
-    margin: 0;
-    padding: 0;
-}
-</style>
-{% endblock extra_css %}

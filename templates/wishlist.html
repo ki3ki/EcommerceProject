@@ -1,0 +1,77 @@
+{% extends 'layouts/main1.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-danger">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'category' %}" class="text-danger">Collections</a></li>
+            <li class="breadcrumb-item"><a href="#" class="text-danger">Luggages and Bags</a></li>
+            <li class="breadcrumb-item active" aria-current="page" class="text-danger">Wishlist</li>
+        </ol>
+    </nav>
+    <h2 class="my-4 text-danger">My Wishlist</h2>
+    {% if wishlist.items.all %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in wishlist.items.all %}
+                    <tr>
+                        <td>
+                            <a href="#">
+                                {{ item.variant.product.name }} - {{ item.variant.color }}
+                            </a>
+                        </td>
+                        <td>${{ item.variant.price }}</td>
+                        <td>
+                            <form method="post" action="{% url 'cart:move_to_cart' item.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-warning">Move to Cart</button>
+                            </form>
+                            <form method="post" action="{% url 'cart:remove_from_wishlist' item.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Your wishlist is empty.</p>
+    {% endif %}
+    <a href="{% url 'category' %}" class="btn btn-outline-danger">Continue Shopping</a>
+</div>
+<!-- arrival section -->
+<section class="arrival_section" style="background: linear-gradient(to bottom, #e8e8e8, #dcdcdc);">
+    <div class="container">
+        <div class="box">
+            <div class="arrival_bg_box">
+                <img src=" {% static 'images/shop3.jpg' %}" alt="">
+            </div>
+            <div class="row ">
+                <div class="col-md-6 ml-auto">
+                    <div class="heading_container remove_line_bt">
+                        <h2 class="text-danger">NewArrivals</h2>
+                    </div>
+                    <p style="margin-top: 20px;margin-bottom: 30px;">
+                      "Travel smart with our latest arrivals. Upgrade your gear for the journey of a lifetime!"
+                    </p>
+                    <a href="{% url 'category' %}">
+                        Shop Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+ <!-- end arrival section -->
+{% endblock %}

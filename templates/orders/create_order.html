@@ -3,60 +3,255 @@
 
 {% block body %}
 <div class="container mt-5">
-    <h2 class="mb-4">Create Order</h2>
-
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        <h3>Select Delivery Address</h3>
-        {% if addresses %}
-            {% for address in addresses %}
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="radio" name="address" id="address{{ address.id }}" value="{{ address.id }}" {% if address.is_default %}checked{% endif %}>
-                    <label class="form-check-label" for="address{{ address.id }}">
-                        {{ address.address_line1 }}, 
-                        {% if address.address_line2 %}{{ address.address_line2 }}, {% endif %}
-                        {{ address.city }}, {{ address.state }} {{ address.postal_code }}, {{ address.country }}
-                        {% if address.is_default %} (Default){% endif %}
-                    </label>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No addresses found. Please add an address.</p>
-        {% endif %}
-
-        <a href="{% url 'accounts:add_address' %}" class="btn btn-secondary mb-3">Add New Address</a>
-
-        <h3>Order Summary</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart.items.all %}
+    <!-- Order Summary Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h4>Order Summary</h4>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>{{ item.variant.product.name }} - {{ item.variant.color }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>${{ item.get_total_price }}</td>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="2">Total:</th>
-                    <th>${{ cart.get_total_price }}</th>
-                </tr>
-            </tfoot>
-        </table>
+                </thead>
+                <tbody>
+                    {% for item in cart.items.all %}
+                        <tr>
+                            <td>{{ item.variant.product.name }} - {{ item.variant.color }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.get_total_price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="2">Total:</th>
+                        <th id="total-price">${{ cart.get_total_price }}</th>
+                    </tr>
+                    <tr id="discount-row" >
+                        <th colspan="2">Discount:</th>
+                        <th id="discount-amount">$0.00</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Final Total after applying discounts:</th>
+                        <th id="total-price-value">${{ cart.get_total_price }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 
-        <button type="submit" class="btn btn-primary">Place Order</button>
+    <!-- Coupon Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-black">
+            <h4>Apply Coupon</h4>
+        </div>
+        <div class="card-body">
+            {% if active_coupons %}
+                <div class="row">
+                    {% for coupon in active_coupons %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-danger">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ coupon.code }}</h5>
+                                    <p class="card-text">Discount: 
+                                        {% if coupon.discount_type == 'percentage' %}
+                                            {{ coupon.discount_value }}%
+                                        {% else %}
+                                            ${{ coupon.discount_value }}
+                                        {% endif %}
+                                    </p>
+                                    <button type="button" class="btn btn-danger apply-coupon" data-code="{{ coupon.code }}" data-discount="{{ coupon.discount_value }}">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-black">Shop for ${{ min_purchase_amount }} more to unlock coupons.</p>
+                <a href="{% url 'category' %}" class="btn btn-outline-danger">Continue Shopping</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="post" id="order-form">
+        {% csrf_token %}
+        
+        <!-- Hidden field to store selected coupon -->
+        <input type="hidden" name="applied_coupon" id="applied-coupon" value="">
+        <input type="hidden" name="final_total" id="finalTotal" value="{{ cart.get_total_price }}">
+
+
+        <div class="row">
+            <!-- Address Selection Card -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-black">
+                        <h4>Select Delivery Address</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if addresses %}
+                            {% for address in addresses %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="address" id="address{{ address.id }}" value="{{ address.id }}" {% if address.is_default %}checked{% endif %}>
+                                    <label class="form-check-label" for="address{{ address.id }}">
+                                        {{ address.address_line1 }}<br>
+                                        {% if address.address_line2 %}{{ address.address_line2 }}<br>{% endif %}
+                                        {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br> {{ address.country }}
+                                        {% if address.is_default %} (Default){% endif %}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No addresses found. Please add an address.</p>
+                            <a href="{% url 'accounts:add_address' %}" class="btn btn-outline-danger">Add New Address</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Selection Card -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4>Select Payment Method</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" id="payment_razorpay" value="RAZORPAY" required>
+                            <label class="form-check-label" for="payment_razorpay">Online Payment</label>
+                        </div>
+
+                        {% if wallet.balance > 0 %}
+                            {% if wallet.balance >= cart.get_total_price %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="payment_wallet" value="WALLET">
+                                    <label class="form-check-label" for="payment_wallet">
+                                        Wallet (Balance: ${{ wallet.balance }})
+                                    </label>
+                                </div>
+                            {% else %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="payment_wallet" value="WALLET" disabled>
+                                    <label class="form-check-label" for="payment_wallet">
+                                        Wallet (Insufficient balance: ${{ wallet.balance }})
+                                    </label>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" id="payment_cod" value="COD" required>
+                            <label class="form-check-label" for="payment_cod">Cash on Delivery</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" id="placeOrderBtn" class="btn btn-danger w-100">Place Order</button>
+
     </form>
 </div>
+
+<!-- JavaScript for Real-time Price & Coupon Handling -->
+<script>
+    document.querySelectorAll(".apply-coupon").forEach((button) => {
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+    
+            // Get coupon code from data attribute
+            const couponCode = this.dataset.code;
+    
+            // ✅ Send coupon to backend using AJAX
+            fetch("{% url 'validate_coupon' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `coupon_code=${couponCode}`,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        // ✅ Update total and show success message
+                        console.log(data.final_total)
+                        document.querySelector("#total-price-value").innerText = `$${data.final_total}`;
+                        document.querySelector("#discount-amount").innerText = `$${data.discount}`;
+                        const finalTotal = document.getElementById("finalTotal").value;
+                        alert("Coupon applied successfully!");
+                    } else {
+                        // ❌ Show error message
+                        alert(data.error);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("Error applying coupon. Please try again.");
+                });
+        });
+    });
+    
+</script>
+<script>
+    document.getElementById("placeOrderBtn").addEventListener("click", function () {
+        const addressId = document.querySelector('input[name="address"]:checked').value;
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const finalTotal = document.getElementById("finalTotal").value;
+        console.log("Clicked")
+
+
+        // ✅ Validate inputs before sending
+        if (!addressId || !paymentMethod) {
+            alert("Please select an address and payment method.");
+            return;
+        }
+
+        // ✅ Prepare form data to send
+        const formData = new FormData();
+        formData.append("address_id", addressId);
+        formData.append("payment_method", paymentMethod);
+        formData.append("final_total", finalTotal);
+    
+
+        // ✅ Send AJAX request
+        fetch("{% url 'place_order' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: formData,
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Order failed. Please try again.");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.success) {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    }else{
+                    alert("Order placed successfully!");
+                    window.location.href = `/orders/order-detail/${data.order_id}/`; // Redirect to confirmation page
+                    }
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("Something went wrong. Please try again.");
+            });
+    });
+</script>
+
+
 {% endblock %}

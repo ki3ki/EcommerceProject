@@ -1,0 +1,19 @@
+{% extends 'layouts/main1.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container mt-5">
+    <h2 class="mb-4">Confirm Order Cancellation</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Are you sure you want to cancel Order #{{ order.id }}?</h5>
+            <p class="card-text">This action cannot be undone. The order amount of ${{ order.total_price }} will be refunded to your wallet.</p>
+            <form method="post" action="{% url 'cancel_order' order.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-secondary">Go Back</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

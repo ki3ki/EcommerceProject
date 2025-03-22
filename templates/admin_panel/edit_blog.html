@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'images/traveltrolley1.jpg' %}" type="">
+    <title>Edit Blog</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.scss' %}">
+    <style>
+        .sidebar {
+            height: 100%;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #575d63;
+        }
+        .main-content {
+            margin-left: 220px; /* Avoid sidebar overlap */
+            padding: 20px;
+            max-width: 800px; /* Limit content width */
+            margin: auto; /* Center content */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'admin_panel:dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_panel:manage_users' %}">Manage Users</a>
+        <a href="{% url 'admin_panel:manage_categories' %}">Manage Categories</a>
+        <a href="{% url 'admin_panel:brand_list' %}">Manage Brands</a>
+        <a href="{% url 'admin_panel:manage_products' %}">Manage Products</a>
+        <a href="{% url 'admin_panel:manage_variants' %}">Manage Variants</a>
+        <a href="{% url 'admin_panel:manage_orders' %}">Manage Orders</a>
+        <a href="{% url 'admin_panel:manage_blogs' %}">Manage Blogs</a>
+        <a href="{% url 'admin_panel:manage_inventory' %}">Manage Inventory</a>
+        <a href="{% url 'admin_panel:logout' %}">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div class="main-content">
+            <h1>Edit Blog</h1>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+</body>
+</html>

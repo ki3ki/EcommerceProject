@@ -22,6 +22,7 @@
       <link href="{%  static 'css/style.css' %}" rel="stylesheet" />
       <!-- responsive style -->
       <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
    </head>
    <body class="sub_page">
       <div class="hero_area">
@@ -61,30 +62,33 @@
         <div class="row">
             <div class="col-lg-8 offset-lg-2">
                 <div class="full">
-                    <h4>Default Address</h4>
+                    <h4 class = "text-danger">Default Address</h4>
                     {% for address in addresses %}
                         {% if address.is_default %}
-                            <div class="address-box">
-                                <p>{{ address }}</p>
-                                <a href="{% url 'accounts:edit_address' address.id %}" class="btn btn-sm btn-primary">Edit</a>
-                            </div>
+                        <div class="address-box d-flex justify-content-between align-items-center p-3 border rounded">
+                           <p class="mb-0">{{ address }}</p>
+                           <a href="{% url 'accounts:edit_address' address.id %}" class="btn btn-sm btn-warning">Edit</a>
+                       </div>
+                       
                         {% endif %}
                     {% endfor %}
 
-                    <h4>Other Addresses</h4>
-                    {% for address in addresses %}
+                    <h4 class="text-danger">Other Addresses</h4>
+                     {% for address in addresses %}
                         {% if not address.is_default %}
-                            <div class="address-box">
-                                <p>{{ address }}</p>
-                                <a href="{% url 'accounts:set_default_address' address.id %}">Set as Default</a>
-                                <a href="{% url 'accounts:edit_address' address.id %}" class="btn btn-sm btn-primary">Edit</a>
-                                <a href="{% url 'accounts:delete_address' address.id %}" class="btn btn-sm btn-danger">Delete</a>
-                                <a href="{% url 'accounts:set_default_address' address.id %}" class="btn btn-sm btn-secondary">Set as Default</a>
-                            </div>
+                           <div class="address-box d-flex justify-content-between align-items-center p-3 border rounded mb-3">
+                                 <p class="mb-0">{{ address }}</p>
+                                 <div>
+                                    <a href="{% url 'accounts:edit_address' address.id %}" class="btn btn-sm btn-warning me-1">Edit</a>
+                                    <a href="{% url 'accounts:delete_address' address.id %}" class="btn btn-sm btn-danger me-1">Delete</a>
+                                    <a href="{% url 'accounts:set_default_address' address.id %}" class="btn btn-sm btn-warning">Set as Default</a>
+                                 </div>
+                           </div>
                         {% endif %}
-                    {% endfor %}
+                     {% endfor %}
 
-                    <a href="{% url 'accounts:add_address' %}" class="btn btn-success">Add New Address</a>
+
+                    <a href="{% url 'accounts:add_address' %}" class="btn btn-danger">Add New Address</a>
                 </div>
             </div>
         </div>

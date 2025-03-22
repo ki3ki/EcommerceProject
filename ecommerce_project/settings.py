@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'store',
     'cart',
     'orders',
+    'coupons',
 
 ]
 
@@ -112,13 +113,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# settings.py
+TIME_ZONE = 'Asia/Kolkata'  # Set to IST
+USE_TZ = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -160,3 +164,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.AllowAllUsersModelBackend',  # allow superusers
     # Other backends as needed
 ]
+
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_SECRET')

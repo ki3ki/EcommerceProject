@@ -6,11 +6,35 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Min
 from django.core.paginator import Paginator
+from cart.models import Cart, Wishlist, WishlistItem, CartItem
+from orders.models import OrderItem
 import json
+from django.db.models import Sum
+from admin_panel.models import Blog
+
+# Create your views here.
 
 
 def home(request):
-    return render(request, 'index.html')
+    wishlist_count = 0
+    cart_count = 0
+    if request.user.is_authenticated:
+        wishlist = Wishlist.objects.filter(user = request.user)
+        print(wishlist)
+        wishlist_count = WishlistItem.objects.filter(wishlist__user=request.user).count()
+        
+        cart = Cart.objects.filter(user=request.user).first()
+        if cart:
+            cart_count = CartItem.objects.filter(cart__user=request.user).count()
+
+    
+    featured_products = Product.objects.filter(is_featured=True)[:6] 
+    context = {
+        'featured_products': featured_products,
+        'wishlist_count': wishlist_count,
+        'cart_count': cart_count,
+    }
+    return render(request, 'index.html',  context)
 
 def collections(request):
     print("collections view is called")
@@ -18,6 +42,13 @@ def collections(request):
         'products__variants__images'
     )
     print(f"Number of categories found: {categories.count()}")
+
+    brands = Brand.objects.filter(is_deleted=False)
+    print(f"Number of brands found: {brands.count()}")
+
+    featured_products = Product.objects.filter(is_featured=True, is_deleted=False)
+    print(f"Number of featured products found: {featured_products.count()}")
+
 
     for category in categories:
         print(f"Processing category: {category.name}")
@@ -40,7 +71,58 @@ def collections(request):
             category.first_image = None
             print('No product found in this category')
 
-    return render(request, 'collections.html', {'categories': categories})
+    for product in featured_products:
+        product.first_variant = product.variants.filter(is_deleted=False).first()
+           
+        if product.first_variant:
+           print(f"First variant in featured product: {product.first_variant.color}")  
+           product.first_image = product.first_variant.images.filter(is_deleted=False).first()
+           if product.first_image:
+              print(f'First image URL: {product.first_image.image}')
+           else:
+              print('No image found for this variant')
+        else:
+           product.first_image = None
+
+    best_sellers = (
+      OrderItem.objects.values('variant')  # Group by variant
+      .annotate(total_sold=Sum('quantity'))  # Sum the quantity sold
+      .order_by('-total_sold')[:4]  # Get the top 4 best-sellers
+    )
+    best_seller_variant_ids = [item['variant'] for item in best_sellers]
+    best_seller_variants = (
+       Variant.objects
+       .select_related('product')  # Fetch product details
+       .prefetch_related('images')  # Fetch related images
+       .filter(id__in=best_seller_variant_ids)  # Filter only best-selling variants
+    )
+    best_seller_data = []
+    for variant in best_seller_variants:
+        first_image = variant.images.filter(is_deleted=False).first()
+        print(f"Product Name: {variant.product.name}")
+        if first_image:
+            print(f"Image URL: {first_image.image.url}")
+        else:
+             print("No image available for this variant.")
+        best_seller_data.append({
+            'product_name': variant.product.name,
+            'variant_id': variant.id,
+            'image_url': first_image.image.url if first_image else None,
+        })
+
+
+   
+
+
+    context = {
+        'categories': categories,
+        'brands': brands,  # Passing brand data with name and image
+        'featured_products': featured_products,
+        'best_seller_data': best_seller_data
+    }
+
+
+    return render(request, 'collections.html', context)
 
 def category_detail(request, category_slug):
     print("category_detail view is called")
@@ -183,3 +265,12 @@ def advanced_search(request):
     }
 
     return render(request, 'advanced_search.html', context)
+
+
+def blog_list(request):
+    blogs = Blog.objects.all().order_by('-created_at')
+    return render(request, 'blog.html', {'blogs': blogs})
+
+def blog_detail(request, slug):
+    blog = get_object_or_404(Blog, slug=slug)
+    return render(request, 'blog_detail.html', {'blog': blog})

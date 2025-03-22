@@ -21,6 +21,7 @@
       <link href="{%  static 'css/style.css' %}" rel="stylesheet" />
       <!-- responsive style -->
       <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
    </head>
    <body class="sub_page">
       <div class="hero_area">
@@ -51,15 +52,42 @@
                              {% csrf_token %}
                              <label for="entered_otp">Enter OTP:</label>
                              <input type="text" name="entered_otp" id="entered_otp">
-                             <button type="submit">Verify</button>
+                             <div class="text-center mt-3">
+                             <button type="submit" class= "btn btn-outline-danger">Verify</button>
+                             </div>
                          </form>
-                         <p class="mt-3">OTP will expire at {{ otp_expiration_time|date:"F j, Y, g:i a" }}</p>
 
-                         <a href="{% url 'accounts:resend_otp' %}">Resend OTP</a>
+                          <!-- Countdown Timer Section -->
+                          <p id="countdown" class="text-center text-dark mt-3 fw-bold"> <strong></strong></p>
+                          
+                          <div class="text- mt-3">
+                           <a href="{% url 'accounts:resend_otp' %}" class="btn btn-warning">Resend OTP</a>
+                       </div>
+                       
                      </div>
                  </div>
              </div>
          </div>
+         <script>
+            // Set the expiration time dynamically
+            const otpExpirationTime = new Date("{{ otp_expiration_time|date:'Y-m-d H:i:s' }}").getTime();
+      
+            function updateCountdown() {
+               const now = new Date().getTime();
+               const timeLeft = otpExpirationTime - now;
+      
+               if (timeLeft > 0) {
+                  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                  document.getElementById('countdown').innerHTML = `OTP expires in <span class="text-danger">${minutes}m ${seconds}s</span>`;
+               } else {
+                  document.getElementById('countdown').innerHTML = '<span class="text-danger">OTP has expired. Please request a new one.</span>';
+               }
+            }
+      
+            // Update countdown every second
+            setInterval(updateCountdown, 1000);
+         </script>
      </section>
      
       <!-- end why section -->
