@@ -4,15 +4,22 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from .models import Address, User
 
-
+# Get the user model dynamically to support custom user models
 User = get_user_model()
 
+
+# ===========================
+# Registration Form
+# ===========================
 class RegisterForm(forms.ModelForm):
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'placeholder': 'Confirm Password',
-        'id': 'join_confirm_password',
-        'required': True
-    }))
+    # Confirm password field with custom attributes
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Confirm Password',
+            'id': 'join_confirm_password',
+            'required': True
+        })
+    )
 
     class Meta:
         model = User
@@ -45,24 +52,28 @@ class RegisterForm(forms.ModelForm):
             }),
         }
 
+    # Full Name Validation: Ensures no numbers in the name
     def clean_full_name(self):
         full_name = self.cleaned_data['full_name']
         if any(char.isdigit() for char in full_name):
             raise ValidationError('Full name cannot contain numbers.')
         return full_name
 
+    # Username Validation: Prevents numeric-only usernames
     def clean_username(self):
         username = self.cleaned_data['username']
         if username.isdigit():
             raise ValidationError('Username cannot be a number.')
         return username
 
+    # Phone Number Validation: Ensures 10-digit numeric phone number
     def clean_phone(self):
         phone = self.cleaned_data['phone']
         if not phone.isdigit() or len(phone) != 10:
             raise ValidationError('Enter a valid 10-digit phone number.')
-        return phone    
+        return phone
 
+    # Password and Confirm Password Match Validation
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
@@ -73,6 +84,7 @@ class RegisterForm(forms.ModelForm):
 
         return cleaned_data
 
+    # Save method to hash the password before saving
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
@@ -80,26 +92,44 @@ class RegisterForm(forms.ModelForm):
             user.save()
         return user
 
+
+# ===========================
+# Login Form
+# ===========================
 class LoginForm(AuthenticationForm):
+    # Email field for login instead of username
     username = forms.EmailField(
         max_length=254,
         required=True,
         label="Email",
-        widget=forms.EmailInput(attrs={'autofocus': True, 'placeholder': 'Email'})
+        widget=forms.EmailInput(attrs={
+            'autofocus': True,
+            'placeholder': 'Email'
+        })
     )
 
+    # Password field with custom attributes
     password = forms.CharField(
         label="Password",
         strip=False,
-        widget=forms.PasswordInput(attrs={'placeholder': 'Password'})
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Password'
+        })
     )
 
 
+# ===========================
+# User Profile Form
+# ===========================
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['full_name', 'phone', 'username']
 
+
+# ===========================
+# Address Form
+# ===========================
 class AddressForm(forms.ModelForm):
     class Meta:
         model = Address
