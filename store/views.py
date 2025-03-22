@@ -167,3 +167,11 @@ def advanced_search(request):
     paginated_products = paginator.get_page(page_number)
 
     return render(request, 'search_results.html', {'products': paginated_products})
+
+def blog_list(request):
+    blogs = Blog.objects.all().order_by('-created_at')
+    return render(request, 'blog.html', {'blogs': blogs})
+
+def blog_detail(request, slug):
+    blog = get_object_or_404(Blog, slug=slug)
+    return render(request, 'blog_detail.html', {'blog': blog})
